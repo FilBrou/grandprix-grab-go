@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
@@ -30,8 +30,26 @@ const ProductCard: React.FC<ProductCardProps> = ({
     addToCart,
     isLoading
   } = useCart();
-  const query = `${product.category} ${product.name}`.toLowerCase();
-  const imageUrl = product.image || product.image_url || `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+  const [imageError, setImageError] = useState(false);
+  
+  // Générer une couleur basée sur la catégorie
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      beer: 'bg-amber-100',
+      wine: 'bg-purple-100', 
+      spirits: 'bg-red-100',
+      cocktails: 'bg-pink-100',
+      soft_drinks: 'bg-blue-100',
+      energy_drinks: 'bg-green-100',
+      sports_drinks: 'bg-orange-100',
+      juices: 'bg-yellow-100'
+    };
+    return colors[category as keyof typeof colors] || 'bg-gray-100';
+  };
+
+  // Utiliser picsum.photos avec un seed basé sur l'ID du produit pour une image consistante
+  const fallbackImageUrl = `https://picsum.photos/seed/${product.id}/800/600`;
+  const imageUrl = product.image || product.image_url || fallbackImageUrl;
 
   const handleAddToCart = async () => {
     await addToCart({
@@ -44,13 +62,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
     });
   };
   return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-        <AspectRatio ratio={16 / 9} className="bg-muted">
-          <img
-            src={imageUrl}
-            alt={`${product.name} - ${t('category.' + product.category)}`}
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
+        <AspectRatio ratio={16 / 9} className={`${getCategoryColor(product.category)} flex items-center justify-center`}>
+          {!imageError ? (
+            <img
+              src={imageUrl}
+              alt={`${product.name} - ${t('category.' + product.category)}`}
+              loading="lazy"
+              className="h-full w-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full w-full text-muted-foreground">
+              <div className="text-4xl mb-2">🍷</div>
+              <span className="text-sm font-medium">{t(`category.${product.category}`)}</span>
+            </div>
+          )}
         </AspectRatio>
 
         <CardContent className="p-4">
