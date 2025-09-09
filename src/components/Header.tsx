@@ -51,12 +51,12 @@ const Header = () => {
                 {currentLanguage?.name}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="z-50 bg-background border shadow-md">
               {languages.map((lang) => (
                 <DropdownMenuItem
                   key={lang.code}
                   onClick={() => setLanguage(lang.code as any)}
-                  className="flex items-center space-x-2 cursor-pointer"
+                  className="flex items-center space-x-2 cursor-pointer hover:bg-accent"
                 >
                   <span>{lang.flag}</span>
                   <span>{lang.name}</span>

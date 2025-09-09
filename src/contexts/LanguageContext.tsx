@@ -97,10 +97,17 @@ const translations = {
     'cart.item': '项',
     'cart.subtotal': '小计',
     'cart.clearAll': '清空购物车',
-    'cart.checkout': '��证订单',
+    'cart.checkout': '验证订单',
     'checkout.title': '订单验证',
     'checkout.subtitle': '完成您的蒙特利尔大奖赛订单',
     'checkout.backToCart': '返回购物车',
+    
+    // Language names
+    'language.en': 'English',
+    'language.zh': '中文',
+    'language.hi': 'हिन्दी', 
+    'language.es': 'Español',
+    'language.fr': 'Français',
   },
   hi: {
     // Navigation
@@ -144,6 +151,13 @@ const translations = {
     'checkout.title': 'ऑर्डर सत्यापन',
     'checkout.subtitle': 'मॉन्ट्रियल ग्रां प्री के लिए अपना ऑर्डर पूरा करें',
     'checkout.backToCart': 'कार्ट पर वापस जाएं',
+    
+    // Language names
+    'language.en': 'English',
+    'language.zh': '中文',
+    'language.hi': 'हिन्दी', 
+    'language.es': 'Español',
+    'language.fr': 'Français',
   },
   es: {
     // Navigation
@@ -187,6 +201,13 @@ const translations = {
     'checkout.title': 'Validación de Pedido',
     'checkout.subtitle': 'Finaliza tu pedido para el Gran Premio de Montreal',
     'checkout.backToCart': 'Volver al carrito',
+    
+    // Language names
+    'language.en': 'English',
+    'language.zh': '中文',
+    'language.hi': 'हिन्दी', 
+    'language.es': 'Español',
+    'language.fr': 'Français',
   },
   fr: {
     // Navigation
