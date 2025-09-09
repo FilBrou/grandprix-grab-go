@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Package, Copy, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Copy, Eye, Wand2 } from 'lucide-react';
 import ItemForm from './ItemForm';
 
 interface Item {
@@ -28,6 +28,7 @@ const ItemsManager = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [isDuplicate, setIsDuplicate] = useState(false);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const { language } = useLanguage();
   const { toast } = useToast();
 
@@ -36,6 +37,7 @@ const ItemsManager = () => {
       title: 'Gestion des Articles',
       subtitle: 'Ajoutez, modifiez et gérez vos articles',
       addItem: 'Ajouter un Article',
+      generateImages: 'Générer Images IA',
       edit: 'Modifier',
       delete: 'Supprimer',
       duplicate: 'Dupliquer',
@@ -60,6 +62,7 @@ const ItemsManager = () => {
       title: 'Items Management',
       subtitle: 'Add, edit and manage your items',
       addItem: 'Add Item',
+      generateImages: 'Generate AI Images',
       edit: 'Edit',
       delete: 'Delete',
       duplicate: 'Duplicate',
@@ -163,23 +166,58 @@ const ItemsManager = () => {
     fetchItems();
   };
 
+  const handleGenerateImages = async () => {
+    setIsGeneratingImages(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-product-images');
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Images générées !',
+        description: data.message,
+      });
+      
+      fetchItems(); // Rafraîchir la liste pour voir les nouvelles images
+    } catch (error) {
+      console.error('Error generating images:', error);
+      toast({
+        title: t.error,
+        description: 'Erreur lors de la génération des images',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingImages(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                {t.title}
-              </CardTitle>
-              <CardDescription>{t.subtitle}</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  {t.title}
+                </CardTitle>
+                <CardDescription>{t.subtitle}</CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleGenerateImages}
+                  disabled={isGeneratingImages}
+                >
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  {isGeneratingImages ? 'Génération...' : t.generateImages}
+                </Button>
+                <Button onClick={() => setShowForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t.addItem}
+                </Button>
+              </div>
             </div>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t.addItem}
-            </Button>
-          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (

@@ -67,3 +67,6 @@ inspector_port = 54330
 
 [functions.send-order-confirmation]
 verify_jwt = false
+
+[functions.generate-product-images]
+verify_jwt = false
