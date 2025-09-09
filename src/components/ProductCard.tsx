@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
-
 interface Product {
   id: string;
   name: string;
@@ -16,15 +15,19 @@ interface Product {
   available: boolean;
   image?: string;
 }
-
 interface ProductCardProps {
   product: Product;
 }
-
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { t } = useLanguage();
-  const { addToCart, isLoading } = useCart();
-
+const ProductCard: React.FC<ProductCardProps> = ({
+  product
+}) => {
+  const {
+    t
+  } = useLanguage();
+  const {
+    addToCart,
+    isLoading
+  } = useCart();
   const handleAddToCart = async () => {
     await addToCart({
       id: product.id,
@@ -35,30 +38,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       image_url: product.image
     });
   };
-
-  return (
-    <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-      <div className="aspect-square bg-muted relative overflow-hidden">
-        {product.image ? (
-          <img 
-            src={product.image} 
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-primary flex items-center justify-center">
-            <Star className="h-12 w-12 text-white/70" />
-          </div>
-        )}
-        
-        {!product.available && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Badge variant="destructive" className="text-sm">
-              {t('common.outOfStock')}
-            </Badge>
-          </div>
-        )}
-      </div>
+  return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
+      
 
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
@@ -83,23 +64,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button
-          onClick={handleAddToCart}
-          disabled={!product.available || product.stock === 0 || isLoading}
-          className="w-full"
-          variant={product.available && product.stock > 0 ? "default" : "secondary"}
-        >
+        <Button onClick={handleAddToCart} disabled={!product.available || product.stock === 0 || isLoading} className="w-full" variant={product.available && product.stock > 0 ? "default" : "secondary"}>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          {isLoading 
-            ? t('common.loading')
-            : product.available && product.stock > 0 
-              ? t('common.addToCart') 
-              : t('common.outOfStock')
-          }
+          {isLoading ? t('common.loading') : product.available && product.stock > 0 ? t('common.addToCart') : t('common.outOfStock')}
         </Button>
       </CardFooter>
-    </Card>
-  );
+    </Card>;
 };
-
 export default ProductCard;
