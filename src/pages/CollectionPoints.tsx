@@ -103,10 +103,10 @@ const CollectionPoints = () => {
 
   const openInMaps = (point: CollectionPoint) => {
     if (point.latitude && point.longitude) {
-      const url = `https://www.openstreetmap.org/?mlat=${point.latitude}&mlon=${point.longitude}&zoom=16&layers=M`;
+      const url = `https://maps.google.com/maps?q=${point.latitude},${point.longitude}&z=16`;
       window.open(url, '_blank');
     } else {
-      const url = `https://www.openstreetmap.org/search?query=${encodeURIComponent(point.location)}`;
+      const url = `https://maps.google.com/maps?q=${encodeURIComponent(point.location)}`;
       window.open(url, '_blank');
     }
   };
