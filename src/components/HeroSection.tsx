@@ -31,9 +31,9 @@ const HeroSection = () => {
             </Button>
             
             <Button 
-              variant="outline" 
+              variant="racing" 
               size="lg"
-              className="border-white text-white hover:bg-white/10 text-lg px-8 py-6 h-auto"
+              className="text-lg px-8 py-6 h-auto"
             >
               <MapPin className="mr-2 h-5 w-5" />
               Points de collecte
