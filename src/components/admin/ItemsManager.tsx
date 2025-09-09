@@ -33,12 +33,12 @@ const ItemsManager = () => {
   const translations = {
     fr: {
       title: 'Gestion des Articles',
-      description: 'Ajoutez, modifiez et gérez vos articles',
+      subtitle: 'Ajoutez, modifiez et gérez vos articles',
       addItem: 'Ajouter un Article',
       edit: 'Modifier',
       delete: 'Supprimer',
       name: 'Nom',
-      description: 'Description',
+      itemDescription: 'Description',
       price: 'Prix',
       stock: 'Stock',
       category: 'Catégorie',
@@ -55,12 +55,12 @@ const ItemsManager = () => {
     },
     en: {
       title: 'Items Management',
-      description: 'Add, edit and manage your items',
+      subtitle: 'Add, edit and manage your items',
       addItem: 'Add Item',
       edit: 'Edit',
       delete: 'Delete',
       name: 'Name',
-      description: 'Description',
+      itemDescription: 'Description',
       price: 'Price',
       stock: 'Stock',
       category: 'Category',
@@ -98,7 +98,7 @@ const ItemsManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems(data || []);
+      setItems((data || []) as Item[]);
     } catch (error) {
       console.error('Error fetching items:', error);
       toast({
@@ -157,7 +157,7 @@ const ItemsManager = () => {
                 <Package className="h-5 w-5" />
                 {t.title}
               </CardTitle>
-              <CardDescription>{t.description}</CardDescription>
+              <CardDescription>{t.subtitle}</CardDescription>
             </div>
             <Button onClick={() => setShowForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -181,7 +181,7 @@ const ItemsManager = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t.name}</TableHead>
-                    <TableHead className="hidden md:table-cell">{t.description}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t.itemDescription}</TableHead>
                     <TableHead>{t.price}</TableHead>
                     <TableHead>{t.stock}</TableHead>
                     <TableHead>{t.category}</TableHead>

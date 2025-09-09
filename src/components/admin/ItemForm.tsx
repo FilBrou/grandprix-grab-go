@@ -45,7 +45,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
   const translations = {
     fr: {
       title: item ? 'Modifier l\'Article' : 'Ajouter un Article',
-      description: item ? 'Modifiez les détails de l\'article' : 'Ajoutez un nouvel article au catalogue',
+      formDescription: item ? 'Modifiez les détails de l\'article' : 'Ajoutez un nouvel article au catalogue',
       name: 'Nom',
       nameRequired: 'Le nom est requis',
       description: 'Description',
@@ -70,7 +70,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
     },
     en: {
       title: item ? 'Edit Item' : 'Add Item',
-      description: item ? 'Edit item details' : 'Add a new item to the catalog',
+      formDescription: item ? 'Edit item details' : 'Add a new item to the catalog',
       name: 'Name',
       nameRequired: 'Name is required',
       description: 'Description',
@@ -170,7 +170,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>{t.title}</CardTitle>
-            <CardDescription>{t.description}</CardDescription>
+            <CardDescription>{t.formDescription}</CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />

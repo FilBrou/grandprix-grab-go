@@ -195,6 +195,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_daily_sales: {
+        Args: { days?: number }
+        Returns: {
+          date: string
+          order_count: number
+          total_sales: number
+        }[]
+      }
+      get_popular_items: {
+        Args: { limit_count?: number }
+        Returns: {
+          item_name: string
+          total_quantity: number
+          total_revenue: number
+        }[]
+      }
+      get_sales_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          average_order_value: number
+          total_items_sold: number
+          total_orders: number
+          total_revenue: number
+        }[]
+      }
       is_admin: {
         Args: { user_uuid: string }
         Returns: boolean
