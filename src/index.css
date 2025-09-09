@@ -111,3 +111,45 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Custom animations for hero section */
+  .animate-in {
+    animation-fill-mode: both;
+  }
+
+  .slide-in-from-bottom-4 {
+    animation-name: slide-in-from-bottom;
+  }
+
+  .hover-scale {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .duration-1000 {
+    animation-duration: 1000ms;
+  }
+
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
