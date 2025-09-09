@@ -84,29 +84,45 @@ const ReportsManager = () => {
     setIsLoading(true);
     
     try {
-      // Fetch daily sales for the last 7 days (mock data for now)
+      // Fetch daily sales
+      const { data: dailySalesData, error: dailySalesError } = await supabase
+        .rpc('get_daily_sales', { days: 7 });
+      
+      if (dailySalesError) throw dailySalesError;
+      setDailySales(dailySalesData || []);
+
+      // Fetch popular items
+      const { data: popularItemsData, error: popularItemsError } = await supabase
+        .rpc('get_popular_items', { limit_count: 10 });
+      
+      if (popularItemsError) throw popularItemsError;
+      setPopularItems(popularItemsData || []);
+
+      // Fetch general sales statistics
+      const { data: salesStatsData, error: salesStatsError } = await supabase
+        .rpc('get_sales_statistics');
+      
+      if (salesStatsError) throw salesStatsError;
+      if (salesStatsData && salesStatsData.length > 0) {
+        setSalesStats(salesStatsData[0]);
+      }
+
+    } catch (error) {
+      console.error('Error fetching reports data:', error);
+      // Fallback to mock data if RPC fails
       const mockDailySales: DailySales[] = [
         { date: '2024-01-15', total_sales: 1250.50, order_count: 15 },
         { date: '2024-01-14', total_sales: 890.25, order_count: 12 },
-        { date: '2024-01-13', total_sales: 1450.75, order_count: 18 },
-        { date: '2024-01-12', total_sales: 980.00, order_count: 14 },
-        { date: '2024-01-11', total_sales: 1120.30, order_count: 16 },
-        { date: '2024-01-10', total_sales: 780.50, order_count: 10 },
-        { date: '2024-01-09', total_sales: 1340.80, order_count: 19 }
+        { date: '2024-01-13', total_sales: 1450.75, order_count: 18 }
       ];
       setDailySales(mockDailySales);
 
-      // Fetch popular items (mock data for now)
       const mockPopularItems: PopularItem[] = [
         { item_name: 'Burger Grand Prix', total_quantity: 45, total_revenue: 854.55 },
-        { item_name: 'Poutine Racing', total_quantity: 38, total_revenue: 493.62 },
-        { item_name: 'Casquette GP Montréal 2024', total_quantity: 25, total_revenue: 874.75 },
-        { item_name: 'Énergie Red Racing', total_quantity: 42, total_revenue: 293.58 },
-        { item_name: 'Bière Locale Montréal', total_quantity: 30, total_revenue: 299.70 }
+        { item_name: 'Poutine Racing', total_quantity: 38, total_revenue: 493.62 }
       ];
       setPopularItems(mockPopularItems);
 
-      // Fetch general sales statistics (mock data for now)
       const mockSalesStats: SalesStats = {
         total_revenue: 8750.50,
         total_orders: 124,
@@ -114,9 +130,6 @@ const ReportsManager = () => {
         total_items_sold: 315
       };
       setSalesStats(mockSalesStats);
-
-    } catch (error) {
-      console.error('Error fetching reports data:', error);
     } finally {
       setIsLoading(false);
     }

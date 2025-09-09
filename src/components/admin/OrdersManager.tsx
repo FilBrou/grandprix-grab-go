@@ -125,7 +125,6 @@ const OrdersManager = () => {
         .from('orders')
         .select(`
           *,
-          profiles (name, email),
           collection_points (name, location),
           order_items (
             quantity,
@@ -136,7 +135,25 @@ const OrdersManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders((data || []) as any);
+      
+      // Fetch user profiles separately for each order
+      const ordersWithProfiles = await Promise.all(
+        (data || []).map(async (order) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('name, email')
+            .eq('user_id', order.user_id)
+            .single();
+
+          return {
+            ...order,
+            status: order.status as 'pending' | 'confirmed' | 'ready' | 'completed' | 'cancelled',
+            profiles: profileData || null
+          };
+        })
+      );
+
+      setOrders(ordersWithProfiles);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({

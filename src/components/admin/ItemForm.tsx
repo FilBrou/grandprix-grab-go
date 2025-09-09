@@ -48,7 +48,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
       formDescription: item ? 'Modifiez les détails de l\'article' : 'Ajoutez un nouvel article au catalogue',
       name: 'Nom',
       nameRequired: 'Le nom est requis',
-      description: 'Description',
+      itemDescription: 'Description',
       price: 'Prix',
       priceRequired: 'Le prix est requis',
       stock: 'Stock',
@@ -73,7 +73,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
       formDescription: item ? 'Edit item details' : 'Add a new item to the catalog',
       name: 'Name',
       nameRequired: 'Name is required',
-      description: 'Description',
+      itemDescription: 'Description',
       price: 'Price',
       priceRequired: 'Price is required',
       stock: 'Stock',
@@ -240,7 +240,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">{t.description}</Label>
+            <Label htmlFor="description">{t.itemDescription}</Label>
             <Textarea
               id="description"
               value={formData.description}

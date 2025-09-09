@@ -98,7 +98,10 @@ const ItemsManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems((data || []) as Item[]);
+      setItems((data || []).map(item => ({
+        ...item,
+        category: item.category as 'food' | 'drinks' | 'merchandise'
+      })));
     } catch (error) {
       console.error('Error fetching items:', error);
       toast({
