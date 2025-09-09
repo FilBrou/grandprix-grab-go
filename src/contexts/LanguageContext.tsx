@@ -291,6 +291,13 @@ const translations = {
     'checkout.title': 'Validation de commande',
     'checkout.subtitle': 'Finalisez votre commande pour le Grand Prix de Montréal',
     'checkout.backToCart': 'Retour au panier',
+    
+    // Language names
+    'language.en': 'English',
+    'language.zh': '中文',
+    'language.hi': 'हिन्दी', 
+    'language.es': 'Español',
+    'language.fr': 'Français',
   },
 };
 
