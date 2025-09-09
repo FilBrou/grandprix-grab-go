@@ -1,0 +1,24 @@
+{
+  "name": "Grand Prix Montréal - Commandes",
+  "short_name": "GP Montréal",
+  "description": "Plateforme de commande pour le Grand Prix de Montréal",
+  "theme_color": "#dc2626",
+  "background_color": "#fafafa",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
