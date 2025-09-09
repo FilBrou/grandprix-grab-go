@@ -1,22 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import NotificationBell from './NotificationBell';
+import CartIcon from './CartIcon';
+import Cart from './Cart';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Globe, User, Settings, LogOut, ShoppingCart } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Globe, User, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 const Header = () => {
-  const {
-    language,
-    setLanguage
-  } = useLanguage();
-  const {
-    user,
-    profile,
-    isAdmin,
-    signOut
-  } = useAuth();
+  const { language, setLanguage } = useLanguage();
+  const { user, profile, isAdmin, signOut } = useAuth();
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const navigate = useNavigate();
   const translations = {
     fr: {
@@ -57,12 +53,21 @@ const Header = () => {
             {language.toUpperCase()}
           </Button>
 
-          <Button variant="ghost" size="sm" className="relative">
-            <ShoppingCart className="h-5 w-5" />
-            <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs bg-primary text-primary-foreground">
-              0
-            </Badge>
-          </Button>
+          <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+            <SheetTrigger asChild>
+              <div>
+                <CartIcon onClick={() => setIsCartOpen(true)} />
+              </div>
+            </SheetTrigger>
+            <SheetContent className="w-full sm:max-w-lg">
+              <SheetHeader>
+                <SheetTitle>Panier</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <Cart />
+              </div>
+            </SheetContent>
+          </Sheet>
           
           {user ? <div className="flex items-center space-x-3">
               <NotificationBell />

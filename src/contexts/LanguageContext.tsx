@@ -35,6 +35,18 @@ const translations = {
     'common.outOfStock': 'Rupture de stock',
     'common.available': 'Disponible',
     'common.loading': 'Chargement...',
+    'common.remove': 'Supprimer',
+    'common.quantity': 'Quantité',
+    'common.total': 'Total',
+    'common.empty': 'Vide',
+    
+    // Cart
+    'cart.title': 'Panier',
+    'cart.empty': 'Votre panier est vide',
+    'cart.items': 'articles',
+    'cart.item': 'article',
+    'cart.subtotal': 'Sous-total',
+    'cart.clearAll': 'Vider le panier',
   },
   en: {
     // Navigation
@@ -62,6 +74,18 @@ const translations = {
     'common.outOfStock': 'Out of stock',
     'common.available': 'Available',
     'common.loading': 'Loading...',
+    'common.remove': 'Remove',
+    'common.quantity': 'Quantity',
+    'common.total': 'Total',
+    'common.empty': 'Empty',
+    
+    // Cart
+    'cart.title': 'Cart',
+    'cart.empty': 'Your cart is empty',
+    'cart.items': 'items',
+    'cart.item': 'item',
+    'cart.subtotal': 'Subtotal',
+    'cart.clearAll': 'Clear cart',
   },
 };
 

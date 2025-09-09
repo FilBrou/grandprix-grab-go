@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
 
 interface Product {
   id: string;
@@ -18,11 +19,22 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (productId: string) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { t } = useLanguage();
+  const { addToCart, isLoading } = useCart();
+
+  const handleAddToCart = async () => {
+    await addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      stock: product.stock,
+      image_url: product.image
+    });
+  };
 
   return (
     <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
@@ -72,15 +84,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
 
       <CardFooter className="p-4 pt-0">
         <Button
-          onClick={() => onAddToCart(product.id)}
-          disabled={!product.available || product.stock === 0}
+          onClick={handleAddToCart}
+          disabled={!product.available || product.stock === 0 || isLoading}
           className="w-full"
           variant={product.available && product.stock > 0 ? "default" : "secondary"}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
-          {product.available && product.stock > 0 
-            ? t('common.addToCart') 
-            : t('common.outOfStock')
+          {isLoading 
+            ? t('common.loading')
+            : product.available && product.stock > 0 
+              ? t('common.addToCart') 
+              : t('common.outOfStock')
           }
         </Button>
       </CardFooter>
