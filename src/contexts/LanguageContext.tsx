@@ -47,6 +47,10 @@ const translations = {
     'cart.item': 'article',
     'cart.subtotal': 'Sous-total',
     'cart.clearAll': 'Vider le panier',
+    'cart.checkout': 'Valider la commande',
+    'checkout.title': 'Validation de commande',
+    'checkout.subtitle': 'Finalisez votre commande pour le Grand Prix de Montréal',
+    'checkout.backToCart': 'Retour au panier',
   },
   en: {
     // Navigation
@@ -86,6 +90,10 @@ const translations = {
     'cart.item': 'item',
     'cart.subtotal': 'Subtotal',
     'cart.clearAll': 'Clear cart',
+    'cart.checkout': 'Validate order',
+    'checkout.title': 'Order Validation',
+    'checkout.subtitle': 'Finalize your order for the Montreal Grand Prix',
+    'checkout.backToCart': 'Back to cart',
   },
 };
 

@@ -52,7 +52,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       collectionPoint: 'Point de collecte',
       selectCollectionPoint: 'Sélectionnez un point de collecte',
       total: 'Total',
-      placeOrder: 'Confirmer la commande',
+      placeOrder: 'Valider la commande',
       processing: 'Traitement...',
       orderSuccess: 'Commande confirmée !',
       orderSuccessDesc: 'Votre commande a été créée avec succès. Vous allez recevoir un email de confirmation.',
@@ -71,7 +71,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       collectionPoint: 'Collection point',
       selectCollectionPoint: 'Select a collection point',
       total: 'Total',
-      placeOrder: 'Place order',
+      placeOrder: 'Validate order',
       processing: 'Processing...',
       orderSuccess: 'Order confirmed!',
       orderSuccessDesc: 'Your order has been created successfully. You will receive a confirmation email.',
@@ -181,7 +181,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
 
       // Update stock for each item
       for (const item of cartItems) {
-        const { error: stockError } = await supabase.rpc('update_item_stock', {
+        const { error: stockError } = await (supabase as any).rpc('update_item_stock', {
           item_id: item.id,
           quantity_to_subtract: item.quantity
         });

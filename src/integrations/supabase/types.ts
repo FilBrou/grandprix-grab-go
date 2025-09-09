@@ -271,6 +271,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      update_item_stock: {
+        Args: { item_id: string; quantity_to_subtract: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
