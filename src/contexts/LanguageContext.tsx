@@ -25,9 +25,17 @@ const translations = {
     
     // Categories
     'category.food': 'Food',
-    'category.drinks': 'Drinks',
+    'category.drinks': 'Drinks', 
     'category.merchandise': 'Merchandise',
     'category.all': 'All products',
+    'category.energy_drinks': 'Energy Drinks',
+    'category.soft_drinks': 'Soft Drinks',
+    'category.juices': 'Juices & Teas',
+    'category.sports_drinks': 'Sports Drinks',
+    'category.beer': 'Beer',
+    'category.wine': 'Wine',
+    'category.spirits': 'Spirits',
+    'category.cocktails': 'Cocktails',
     
     // Common
     'common.price': 'Price',
@@ -78,6 +86,14 @@ const translations = {
     'category.drinks': '饮料',
     'category.merchandise': '商品',
     'category.all': '所有产品',
+    'category.energy_drinks': '能量饮料',
+    'category.soft_drinks': '软饮料',
+    'category.juices': '果汁和茶',
+    'category.sports_drinks': '运动饮料',
+    'category.beer': '啤酒',
+    'category.wine': '葡萄酒',
+    'category.spirits': '烈酒',
+    'category.cocktails': '鸡尾酒',
     
     // Common
     'common.price': '价格',
@@ -128,6 +144,14 @@ const translations = {
     'category.drinks': 'पेय',
     'category.merchandise': 'माल',
     'category.all': 'सभी उत्पाद',
+    'category.energy_drinks': 'एनर्जी ड्रिंक',
+    'category.soft_drinks': 'सॉफ्ट ड्रिंक',
+    'category.juices': 'जूस और चाय',
+    'category.sports_drinks': 'स्पोर्ट्स ड्रिंक',
+    'category.beer': 'बीयर',
+    'category.wine': 'वाइन',
+    'category.spirits': 'स्पिरिट्स',
+    'category.cocktails': 'कॉकटेल',
     
     // Common
     'common.price': 'मूल्य',
@@ -178,6 +202,14 @@ const translations = {
     'category.drinks': 'Bebidas',
     'category.merchandise': 'Mercancía',
     'category.all': 'Todos los productos',
+    'category.energy_drinks': 'Bebidas Energéticas',
+    'category.soft_drinks': 'Refrescos',
+    'category.juices': 'Jugos y Tés',
+    'category.sports_drinks': 'Bebidas Deportivas',
+    'category.beer': 'Cerveza',
+    'category.wine': 'Vino',
+    'category.spirits': 'Licores',
+    'category.cocktails': 'Cócteles',
     
     // Common
     'common.price': 'Precio',
@@ -228,6 +260,14 @@ const translations = {
     'category.drinks': 'Boissons',
     'category.merchandise': 'Produits dérivés',
     'category.all': 'Tous les produits',
+    'category.energy_drinks': 'Boissons énergisantes',
+    'category.soft_drinks': 'Boissons gazeuses',
+    'category.juices': 'Jus et thés',
+    'category.sports_drinks': 'Boissons sportives',
+    'category.beer': 'Bières',
+    'category.wine': 'Vins',
+    'category.spirits': 'Spiritueux',
+    'category.cocktails': 'Cocktails',
     
     // Common
     'common.price': 'Prix',
