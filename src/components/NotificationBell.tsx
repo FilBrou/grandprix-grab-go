@@ -108,7 +108,7 @@ const NotificationBell: React.FC = () => {
         </div>
         
         <ScrollArea className="h-80">
-          {notifications.length === 0 ? (
+          {notifications && notifications.length === 0 ? (
             <div className="p-6 text-center">
               <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="font-medium text-muted-foreground">{t.noNotifications}</p>
@@ -116,7 +116,7 @@ const NotificationBell: React.FC = () => {
             </div>
           ) : (
             <div className="divide-y">
-              {notifications.map((notification) => (
+              {notifications && notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors ${

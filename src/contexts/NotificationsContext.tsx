@@ -224,10 +224,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   }, [user]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = (notifications || []).filter(n => !n.read).length;
 
   const value: NotificationsContextType = {
-    notifications,
+    notifications: notifications || [],
     unreadCount,
     markAsRead,
     markAllAsRead,
