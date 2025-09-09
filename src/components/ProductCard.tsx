@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Star } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 interface Product {
@@ -14,6 +15,7 @@ interface Product {
   stock: number;
   available: boolean;
   image?: string;
+  image_url?: string;
 }
 interface ProductCardProps {
   product: Product;
@@ -28,6 +30,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
     addToCart,
     isLoading
   } = useCart();
+  const query = `${product.category} ${product.name}`.toLowerCase();
+  const imageUrl = product.image || product.image_url || `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+
   const handleAddToCart = async () => {
     await addToCart({
       id: product.id,
@@ -35,13 +40,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
       price: product.price,
       category: product.category,
       stock: product.stock,
-      image_url: product.image
+      image_url: imageUrl
     });
   };
   return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-      
+        <AspectRatio ratio={16 / 9} className="bg-muted">
+          <img
+            src={imageUrl}
+            alt={`${product.name} - ${t('category.' + product.category)}`}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        </AspectRatio>
 
-      <CardContent className="p-4">
+        <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-semibold text-lg leading-tight">{product.name}</h3>
           <Badge variant="outline" className="ml-2 shrink-0">
@@ -53,10 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {product.description}
         </p>
         
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold text-primary">
-            ${product.price.toFixed(2)}
-          </span>
+        <div className="flex items-center justify-end">
           <span className="text-sm text-muted-foreground">
             Stock: {product.stock}
           </span>
