@@ -11,7 +11,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import OrderDemo from "./pages/OrderDemo";
-import CollectionPoints from "./pages/CollectionPoints";
 import CartPage from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 
@@ -32,7 +31,6 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/order" element={<OrderDemo />} />
-                  <Route path="/collection-points" element={<CollectionPoints />} />
                   <Route path="/cart" element={<CartPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
