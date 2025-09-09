@@ -1,12 +1,17 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  
+  const scrollToCatalog = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+  };
 
   return (
     <section className="relative min-h-[600px] flex items-center justify-center bg-gradient-hero text-white overflow-hidden">
@@ -22,24 +27,15 @@ const HeroSection = () => {
             {t('hero.subtitle')}
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-in slide-in-from-bottom-4 duration-1000 delay-400">
+          <div className="flex justify-center animate-in slide-in-from-bottom-4 duration-1000 delay-400">
             <Button 
               variant="hero"
               size="lg" 
-              className="text-lg px-8 py-6 h-auto"
+              className="text-lg px-8 py-6 h-auto hover-scale"
+              onClick={scrollToCatalog}
             >
               {t('hero.cta')}
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            
-            <Button 
-              variant="racing" 
-              size="lg"
-              className="text-lg px-8 py-6 h-auto"
-              onClick={() => navigate('/collection-points')}
-            >
-              <MapPin className="mr-2 h-5 w-5" />
-              Points de collecte
             </Button>
           </div>
         </div>
