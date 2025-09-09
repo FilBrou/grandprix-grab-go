@@ -175,6 +175,45 @@ const OrdersManager = () => {
 
       if (error) throw error;
 
+      // Find the order to get user info
+      const updatedOrder = orders.find(order => order.id === orderId);
+      if (updatedOrder) {
+        // Create notification based on status
+        if (newStatus === 'ready') {
+          const { error: notifError } = await supabase
+            .from('notifications')
+            .insert({
+              user_id: updatedOrder.user_id,
+              order_id: orderId,
+              type: 'order_ready',
+              title: language === 'fr' ? 'Commande prête' : 'Order ready',
+              message: language === 'fr' 
+                ? `Votre commande #${orderId.slice(-8)} est prête à être récupérée !`
+                : `Your order #${orderId.slice(-8)} is ready for pickup!`
+            });
+
+          if (notifError) {
+            console.error('Error creating notification:', notifError);
+          }
+        } else if (newStatus === 'completed') {
+          const { error: notifError } = await supabase
+            .from('notifications')
+            .insert({
+              user_id: updatedOrder.user_id,
+              order_id: orderId,
+              type: 'order_completed',
+              title: language === 'fr' ? 'Commande terminée' : 'Order completed',
+              message: language === 'fr' 
+                ? `Votre commande #${orderId.slice(-8)} a été récupérée avec succès !`
+                : `Your order #${orderId.slice(-8)} has been successfully picked up!`
+            });
+
+          if (notifError) {
+            console.error('Error creating notification:', notifError);
+          }
+        }
+      }
+
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, status: newStatus as any } : order
       ));

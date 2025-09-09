@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import NotificationBell from './NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -72,6 +73,7 @@ const Header = () => {
           
           {user ? (
             <div className="flex items-center space-x-3">
+              <NotificationBell />
               <div className="flex items-center space-x-2">
                 <User className="h-4 w-4" />
                 <span className="text-sm font-medium">{profile?.name}</span>
