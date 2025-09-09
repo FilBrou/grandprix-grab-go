@@ -34,7 +34,8 @@ const Auth = () => {
       backToHome: 'Retour à l\'accueil',
       signInSuccess: 'Connexion réussie!',
       signUpSuccess: 'Inscription réussie! Vérifiez votre email.',
-      error: 'Erreur'
+      error: 'Erreur',
+      adminLogin: 'Connexion Admin'
     },
     en: {
       signIn: 'Sign In',
@@ -49,7 +50,8 @@ const Auth = () => {
       backToHome: 'Back to Home',
       signInSuccess: 'Successfully signed in!',
       signUpSuccess: 'Successfully signed up! Check your email.',
-      error: 'Error'
+      error: 'Error',
+      adminLogin: 'Admin Login'
     }
   };
 
@@ -241,6 +243,16 @@ const Auth = () => {
                 </Card>
               </TabsContent>
             </Tabs>
+            
+            <div className="mt-6 pt-6 border-t border-border">
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/admin')}
+                className="w-full text-muted-foreground hover:text-primary hover:bg-primary/5"
+              >
+                {t.adminLogin}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
