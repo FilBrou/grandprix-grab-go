@@ -37,7 +37,7 @@ interface OrderConfirmationData {
   }>;
   totalAmount: number;
   collectionPoint: string;
-  language: 'fr' | 'en';
+  language: 'en' | 'zh' | 'hi' | 'es' | 'fr';
 }
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
