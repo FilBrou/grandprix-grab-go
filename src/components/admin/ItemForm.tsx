@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, Copy } from 'lucide-react';
+import ImageUpload from './ImageUpload';
 
 interface Item {
   id: string;
@@ -25,9 +26,10 @@ interface Item {
 interface ItemFormProps {
   item?: Item | null;
   onClose: () => void;
+  isDuplicate?: boolean;
 }
 
-const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
+const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -44,8 +46,8 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
 
   const translations = {
     fr: {
-      title: item ? 'Modifier l\'Article' : 'Ajouter un Article',
-      formDescription: item ? 'Modifiez les détails de l\'article' : 'Ajoutez un nouvel article au catalogue',
+      title: isDuplicate ? 'Dupliquer l\'Article' : (item ? 'Modifier l\'Article' : 'Ajouter un Article'),
+      formDescription: isDuplicate ? 'Créez une copie de cet article' : (item ? 'Modifiez les détails de l\'article' : 'Ajoutez un nouvel article au catalogue'),
       name: 'Nom',
       nameRequired: 'Le nom est requis',
       itemDescription: 'Description',
@@ -69,8 +71,8 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
       error: 'Erreur'
     },
     en: {
-      title: item ? 'Edit Item' : 'Add Item',
-      formDescription: item ? 'Edit item details' : 'Add a new item to the catalog',
+      title: isDuplicate ? 'Duplicate Item' : (item ? 'Edit Item' : 'Add Item'),
+      formDescription: isDuplicate ? 'Create a copy of this item' : (item ? 'Edit item details' : 'Add a new item to the catalog'),
       name: 'Name',
       nameRequired: 'Name is required',
       itemDescription: 'Description',
@@ -126,7 +128,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
         image_url: formData.image_url || null
       };
 
-      if (item) {
+      if (item && !isDuplicate) {
         // Update existing item
         const { error } = await supabase
           .from('items')
@@ -139,7 +141,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
           title: t.itemUpdated,
         });
       } else {
-        // Create new item
+        // Create new item (including duplicates)
         const { error } = await supabase
           .from('items')
           .insert([itemData]);
@@ -147,7 +149,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
         if (error) throw error;
 
         toast({
-          title: t.itemSaved,
+          title: isDuplicate ? 'Article dupliqué avec succès' : t.itemSaved,
         });
       }
 
@@ -250,16 +252,11 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="image_url">{t.imageUrl}</Label>
-            <Input
-              id="image_url"
-              type="url"
-              value={formData.image_url}
-              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              disabled={isLoading}
-            />
-          </div>
+          <ImageUpload
+            currentImageUrl={formData.image_url}
+            onImageUpload={(url) => setFormData({ ...formData, image_url: url })}
+            onImageRemove={() => setFormData({ ...formData, image_url: '' })}
+          />
 
           <div className="flex items-center space-x-2">
             <Switch
@@ -277,7 +274,12 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose }) => {
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {item ? (isLoading ? t.updating : t.update) : (isLoading ? t.saving : t.save)}
+              {isDuplicate 
+                ? (isLoading ? 'Duplication...' : 'Dupliquer')
+                : item 
+                ? (isLoading ? t.updating : t.update) 
+                : (isLoading ? t.saving : t.save)
+              }
             </Button>
           </div>
         </form>

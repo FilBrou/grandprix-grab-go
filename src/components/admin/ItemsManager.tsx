@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Copy, Eye } from 'lucide-react';
 import ItemForm from './ItemForm';
 
 interface Item {
@@ -27,6 +27,7 @@ const ItemsManager = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [isDuplicate, setIsDuplicate] = useState(false);
   const { language } = useLanguage();
   const { toast } = useToast();
 
@@ -37,6 +38,8 @@ const ItemsManager = () => {
       addItem: 'Ajouter un Article',
       edit: 'Modifier',
       delete: 'Supprimer',
+      duplicate: 'Dupliquer',
+      viewImage: 'Voir l\'image',
       name: 'Nom',
       itemDescription: 'Description',
       price: 'Prix',
@@ -59,6 +62,8 @@ const ItemsManager = () => {
       addItem: 'Add Item',
       edit: 'Edit',
       delete: 'Delete',
+      duplicate: 'Duplicate',
+      viewImage: 'View image',
       name: 'Name',
       itemDescription: 'Description',
       price: 'Price',
@@ -141,12 +146,20 @@ const ItemsManager = () => {
 
   const handleEdit = (item: Item) => {
     setEditingItem(item);
+    setIsDuplicate(false);
+    setShowForm(true);
+  };
+
+  const handleDuplicate = (item: Item) => {
+    setEditingItem(item);
+    setIsDuplicate(true);
     setShowForm(true);
   };
 
   const handleFormClose = () => {
     setShowForm(false);
     setEditingItem(null);
+    setIsDuplicate(false);
     fetchItems();
   };
 
@@ -183,6 +196,7 @@ const ItemsManager = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Image</TableHead>
                     <TableHead>{t.name}</TableHead>
                     <TableHead className="hidden md:table-cell">{t.itemDescription}</TableHead>
                     <TableHead>{t.price}</TableHead>
@@ -195,6 +209,22 @@ const ItemsManager = () => {
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.id}>
+                      <TableCell>
+                        <div className="w-12 h-12 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                          {item.image_url ? (
+                            <img 
+                              src={item.image_url} 
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = '/placeholder.svg';
+                              }}
+                            />
+                          ) : (
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell className="hidden md:table-cell max-w-xs truncate">
                         {item.description}
@@ -216,11 +246,30 @@ const ItemsManager = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1">
+                          {item.image_url && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => window.open(item.image_url!, '_blank')}
+                              title={t.viewImage}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDuplicate(item)}
+                            title={t.duplicate}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEdit(item)}
+                            title={t.edit}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -228,6 +277,7 @@ const ItemsManager = () => {
                             variant="destructive"
                             size="sm"
                             onClick={() => handleDelete(item.id)}
+                            title={t.delete}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -246,6 +296,7 @@ const ItemsManager = () => {
         <ItemForm
           item={editingItem}
           onClose={handleFormClose}
+          isDuplicate={isDuplicate}
         />
       )}
     </div>
