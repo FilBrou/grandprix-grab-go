@@ -41,10 +41,46 @@ const NotificationBell: React.FC = () => {
         hours: '{{count}}h ago',
         days: '{{count}}d ago'
       }
+    },
+    es: {
+      notifications: 'Notificaciones',
+      markAllRead: 'Marcar todo como leído',
+      noNotifications: 'Sin notificaciones',
+      noNotificationsDesc: '¡Estás al día!',
+      timeAgo: {
+        now: 'Ahora mismo',
+        minutes: 'hace {{count}} min',
+        hours: 'hace {{count}}h',
+        days: 'hace {{count}}d'
+      }
+    },
+    zh: {
+      notifications: '通知',
+      markAllRead: '全部标记为已读',
+      noNotifications: '无通知',
+      noNotificationsDesc: '您已查看全部！',
+      timeAgo: {
+        now: '刚刚',
+        minutes: '{{count}}分钟前',
+        hours: '{{count}}小时前',
+        days: '{{count}}天前'
+      }
+    },
+    hi: {
+      notifications: 'सूचनाएं',
+      markAllRead: 'सभी को पढ़ा हुआ चिह्नित करें',
+      noNotifications: 'कोई सूचना नहीं',
+      noNotificationsDesc: 'आप अप-टू-डेट हैं!',
+      timeAgo: {
+        now: 'अभी',
+        minutes: '{{count}} मिनट पहले',
+        hours: '{{count}} घंटे पहले',
+        days: '{{count}} दिन पहले'
+      }
     }
   };
 
-  const t = translations[language];
+  const t = translations[language as keyof typeof translations] || translations.en;
 
   const formatTimeAgo = (dateString: string) => {
     const now = new Date();
