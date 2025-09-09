@@ -2,7 +2,6 @@ import React from 'react';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import ProductsFromDatabase from '@/components/ProductsFromDatabase';
-import ImageGenerationButton from '@/components/ImageGenerationButton';
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -11,8 +10,7 @@ const Index = () => {
       <Header />
       <main>
         <HeroSection />
-        <div className="container mx-auto px-4 py-8 space-y-8">
-          <ImageGenerationButton />
+        <div className="container mx-auto px-4 py-8">
           <ProductsFromDatabase />
         </div>
       </main>
