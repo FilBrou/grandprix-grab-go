@@ -2,9 +2,11 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   return (
     <section className="relative min-h-[600px] flex items-center justify-center bg-gradient-hero text-white overflow-hidden">
@@ -34,6 +36,7 @@ const HeroSection = () => {
               variant="racing" 
               size="lg"
               className="text-lg px-8 py-6 h-auto"
+              onClick={() => navigate('/collection-points')}
             >
               <MapPin className="mr-2 h-5 w-5" />
               Points de collecte

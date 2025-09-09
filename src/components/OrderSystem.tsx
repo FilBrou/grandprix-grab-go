@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,6 +8,7 @@ import { useNotifications } from '@/contexts/NotificationsContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ShoppingCart, MapPin } from 'lucide-react';
+import CollectionPointSelector from './CollectionPointSelector';
 
 interface CartItem {
   id: string;
@@ -22,6 +22,10 @@ interface CollectionPoint {
   id: string;
   name: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
+  type: 'entrepot' | 'sous_entrepot' | 'point_de_livraison';
+  created_at: string;
 }
 
 interface OrderSystemProps {
@@ -31,12 +35,8 @@ interface OrderSystemProps {
 
 const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) => {
   const [selectedCollectionPoint, setSelectedCollectionPoint] = useState<string>('');
-  const [collectionPoints] = useState<CollectionPoint[]>([
-    { id: '1', name: 'Grandstand Principal', location: 'Section A - Entrée principale' },
-    { id: '2', name: 'Paddock VIP', location: 'Zone VIP - Près des stands' },
-    { id: '3', name: 'Turn 1 Grandstand', location: 'Virage 1 - Tribune Est' },
-    { id: '4', name: 'Finish Line', location: 'Ligne d\'arrivée - Tribune Ouest' }
-  ]);
+  const [collectionPoints, setCollectionPoints] = useState<CollectionPoint[]>([]);
+  const [isLoadingPoints, setIsLoadingPoints] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   
   const { language } = useLanguage();
@@ -88,6 +88,37 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
   const t = translations[language];
 
   const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  useEffect(() => {
+    fetchCollectionPoints();
+  }, []);
+
+  const fetchCollectionPoints = async () => {
+    try {
+      setIsLoadingPoints(true);
+      const { data, error } = await supabase
+        .from('collection_points')
+        .select('*')
+        .order('type', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      setCollectionPoints((data || []).map(point => ({
+        ...point,
+        type: point.type as 'entrepot' | 'sous_entrepot' | 'point_de_livraison'
+      })));
+    } catch (error) {
+      console.error('Error fetching collection points:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger les points de collecte',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingPoints(false);
+    }
+  };
 
   const handlePlaceOrder = async () => {
     if (!user || !profile) {
@@ -243,6 +274,12 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
         </CardContent>
       </Card>
 
+      {/* Collection Point Selection */}
+      <CollectionPointSelector
+        selectedPointId={selectedCollectionPoint}
+        onSelectPoint={setSelectedCollectionPoint}
+      />
+
       {/* Order Form */}
       <Card>
         <CardHeader>
@@ -252,29 +289,10 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
           </CardTitle>
           <CardDescription>{t.description}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t.collectionPoint} *</label>
-            <Select value={selectedCollectionPoint} onValueChange={setSelectedCollectionPoint}>
-              <SelectTrigger>
-                <SelectValue placeholder={t.selectCollectionPoint} />
-              </SelectTrigger>
-              <SelectContent>
-                {collectionPoints.map((point) => (
-                  <SelectItem key={point.id} value={point.id}>
-                    <div>
-                      <div className="font-medium">{point.name}</div>
-                      <div className="text-sm text-muted-foreground">{point.location}</div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
+        <CardContent>
           <Button 
             onClick={handlePlaceOrder} 
-            disabled={isLoading || !selectedCollectionPoint}
+            disabled={isLoading || !selectedCollectionPoint || cartItems.length === 0}
             className="w-full"
             size="lg"
           >
