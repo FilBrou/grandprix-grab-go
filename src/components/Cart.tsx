@@ -6,10 +6,12 @@ import { Separator } from '@/components/ui/separator';
 import { Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 const Cart: React.FC = () => {
   const { items, totalItems, totalAmount, removeFromCart, updateQuantity, clearCart, isLoading } = useCart();
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   if (items.length === 0) {
     return (
@@ -134,7 +136,7 @@ const Cart: React.FC = () => {
           </div>
           
           <Button 
-            onClick={() => window.location.href = '/checkout'}
+            onClick={() => navigate('/checkout')}
             className="w-full mt-4"
             size="lg"
           >

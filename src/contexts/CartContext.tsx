@@ -27,13 +27,27 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  // Récupérer les items du localStorage au chargement
+  const [items, setItems] = useState<CartItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('cart-items');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  // Sauvegarder les items dans localStorage chaque fois qu'ils changent
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cart-items', JSON.stringify(items));
+    }
+  }, [items]);
 
   // Check stock availability
   const checkStock = async (itemId: string, requestedQuantity: number): Promise<boolean> => {
@@ -153,6 +167,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const clearCart = () => {
     setItems([]);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('cart-items');
+    }
     toast({
       title: "Panier vidé",
       description: "Tous les items ont été supprimés du panier",
