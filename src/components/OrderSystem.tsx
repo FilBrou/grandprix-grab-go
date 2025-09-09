@@ -179,6 +179,16 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
 
       if (itemsError) throw itemsError;
 
+      // Update stock for each item
+      for (const item of cartItems) {
+        const { error: stockError } = await supabase.rpc('update_item_stock', {
+          item_id: item.id,
+          quantity_to_subtract: item.quantity
+        });
+
+        if (stockError) throw stockError;
+      }
+
       // Get collection point details
       const selectedPoint = collectionPoints.find(p => p.id === selectedCollectionPoint);
       

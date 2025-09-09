@@ -132,6 +132,15 @@ const Cart: React.FC = () => {
             <span>{t('cart.subtotal')}</span>
             <span className="text-primary">${totalAmount.toFixed(2)}</span>
           </div>
+          
+          <Button 
+            onClick={() => window.location.href = '/checkout'}
+            className="w-full mt-4"
+            size="lg"
+          >
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            {t('cart.checkout')}
+          </Button>
         </div>
       </CardContent>
     </Card>
