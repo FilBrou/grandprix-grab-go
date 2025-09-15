@@ -41,10 +41,14 @@ const Header = () => {
             {t('nav.home')}
           </Button>
           <Button variant="ghost" className="text-sm font-medium" onClick={() => {
-            window.scrollTo({
-              top: window.innerHeight,
-              behavior: 'smooth'
-            });
+            if (window.location.pathname === '/') {
+              window.scrollTo({
+                top: window.innerHeight,
+                behavior: 'smooth'
+              });
+            } else {
+              navigate('/#catalog');
+            }
           }}>
             {t('nav.catalog')}
           </Button>
