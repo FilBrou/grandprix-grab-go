@@ -123,6 +123,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </CardContent>
 
       <CardFooter className="p-4 pt-0 space-y-3">
+        {/* Add to Cart Button */}
+        <Button 
+          onClick={handleAddToCart} 
+          disabled={!product.available || product.stock === 0 || isLoading} 
+          className="w-full h-10 text-sm" 
+          variant={product.available && product.stock > 0 ? "default" : "secondary"}
+        >
+          <ShoppingCart className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {isLoading ? t('common.loading') : product.available && product.stock > 0 ? t('common.addToCart') : t('common.outOfStock')}
+          </span>
+        </Button>
+
         {/* Quantity Controls */}
         {product.available && product.stock > 0 && (
           <div className="flex items-center justify-center space-x-3 w-full">
@@ -154,19 +167,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </Button>
           </div>
         )}
-        
-        {/* Add to Cart Button */}
-        <Button 
-          onClick={handleAddToCart} 
-          disabled={!product.available || product.stock === 0 || isLoading} 
-          className="w-full h-10 text-sm" 
-          variant={product.available && product.stock > 0 ? "default" : "secondary"}
-        >
-          <ShoppingCart className="mr-2 h-4 w-4 shrink-0" />
-          <span className="truncate">
-            {isLoading ? t('common.loading') : product.available && product.stock > 0 ? t('common.addToCart') : t('common.outOfStock')}
-          </span>
-        </Button>
       </CardFooter>
     </Card>;
 };
