@@ -31,7 +31,13 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         
         <nav className="hidden md:flex items-center space-x-6">
-          <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate('/')}>
+          <Button variant="ghost" className="text-sm font-medium" onClick={() => {
+            if (window.location.pathname === '/') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              navigate('/');
+            }
+          }}>
             {t('nav.home')}
           </Button>
           <Button variant="ghost" className="text-sm font-medium" onClick={() => {
