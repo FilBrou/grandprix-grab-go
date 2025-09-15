@@ -138,11 +138,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Quantity Controls */}
         {product.available && product.stock > 0 && (
-          <div className="flex items-center justify-center space-x-3 w-full">
+          <div className="flex items-center justify-center space-x-2 w-full">
             <Button
               variant="outline"
-              size="icon"
-              className="h-8 w-8"
+              size="sm"
+              className="h-9 w-9 border-2"
               onClick={decrementQuantity}
               disabled={quantity <= 1}
             >
@@ -152,14 +152,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
               type="number"
               value={quantity}
               onChange={handleQuantityChange}
-              className="w-16 text-center h-8"
+              className="w-20 text-center h-9 font-medium"
               min={1}
               max={product.stock}
             />
             <Button
               variant="outline"
-              size="icon"
-              className="h-8 w-8"
+              size="sm"
+              className="h-9 w-9 border-2"
               onClick={incrementQuantity}
               disabled={quantity >= product.stock}
             >
