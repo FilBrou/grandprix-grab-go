@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gp-montreal-v1';
+const CACHE_NAME = 'gp-montreal-v2';
 const urlsToCache = [
   '/',
   '/manifest.json',
@@ -10,6 +10,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -34,6 +35,6 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
