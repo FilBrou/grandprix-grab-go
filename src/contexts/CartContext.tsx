@@ -18,7 +18,7 @@ interface CartContextType {
   totalItems: number;
   totalAmount: number;
   isLoading: boolean;
-  addToCart: (item: Omit<CartItem, 'quantity'>) => Promise<void>;
+  addToCart: (item: Omit<CartItem, 'quantity'>, quantity?: number) => Promise<void>;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   clearCart: () => void;
@@ -67,7 +67,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const addToCart = async (newItem: Omit<CartItem, 'quantity'>) => {
+  const addToCart = async (newItem: Omit<CartItem, 'quantity'>, addQuantity: number = 1) => {
     if (!user) {
       toast({
         title: "Authentification requise",
@@ -80,7 +80,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     try {
       const existingItem = items.find(item => item.id === newItem.id);
-      const requestedQuantity = existingItem ? existingItem.quantity + 1 : 1;
+      const requestedQuantity = existingItem ? existingItem.quantity + addQuantity : addQuantity;
 
       const hasStock = await checkStock(newItem.id, requestedQuantity);
       if (!hasStock) {
@@ -95,16 +95,16 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (existingItem) {
         setItems(items.map(item => 
           item.id === newItem.id 
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + addQuantity }
             : item
         ));
       } else {
-        setItems([...items, { ...newItem, quantity: 1 }]);
+        setItems([...items, { ...newItem, quantity: addQuantity }]);
       }
 
       toast({
         title: "Ajouté au panier",
-        description: `${newItem.name} a été ajouté à votre panier`,
+        description: `${addQuantity} x ${newItem.name} ajouté${addQuantity > 1 ? 's' : ''} à votre panier`,
       });
     } catch (error) {
       console.error('Error adding to cart:', error);

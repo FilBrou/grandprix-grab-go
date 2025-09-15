@@ -55,16 +55,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const imageUrl = product.image || product.image_url || fallbackImageUrl;
 
   const handleAddToCart = async () => {
-    for (let i = 0; i < quantity; i++) {
-      await addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        category: product.category,
-        stock: product.stock,
-        image_url: imageUrl
-      });
-    }
+    await addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      stock: product.stock,
+      image_url: imageUrl
+    }, quantity);
     setQuantity(1); // Reset quantity after adding to cart
   };
 
