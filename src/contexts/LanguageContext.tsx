@@ -252,6 +252,14 @@ const translations = {
     'orders.cancelled': 'Annulée',
     'orders.sortByDate': 'Trier par date',
     'orders.noMatchingOrders': 'Aucune commande ne correspond aux filtres sélectionnés.',
+    'orders.totalItems': 'Total articles',
+    'orders.items': 'articles',
+    'orders.orderDetails': 'Détails de la commande',
+    'orders.orderItems': 'Articles commandés',
+    'orders.product': 'Produit',
+    'orders.unitPrice': 'Prix unitaire',
+    'orders.subtotal': 'Sous-total',
+    'orders.collectionPoint': 'Point de collecte',
     
     // Language names
     'language.en': 'English',
@@ -329,6 +337,14 @@ const translations = {
     'orders.cancelled': 'Cancelled',
     'orders.sortByDate': 'Sort by Date',
     'orders.noMatchingOrders': 'No orders match the selected filters.',
+    'orders.totalItems': 'Total items',
+    'orders.items': 'items',
+    'orders.orderDetails': 'Order details',
+    'orders.orderItems': 'Order items',
+    'orders.product': 'Product',
+    'orders.unitPrice': 'Unit price',
+    'orders.subtotal': 'Subtotal',
+    'orders.collectionPoint': 'Collection point',
     
     // Language names
     'language.en': 'English',

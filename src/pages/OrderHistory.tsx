@@ -8,7 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Package, Calendar, MapPin, ArrowUpDown } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Package, Calendar, MapPin, ArrowUpDown, Eye } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { format } from 'date-fns';
@@ -41,6 +42,7 @@ const OrderHistory = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -95,6 +97,10 @@ const OrderHistory = () => {
 
   const handleSortToggle = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const getTotalItems = (order: Order) => {
+    return order.order_items.reduce((total, item) => total + item.quantity, 0);
   };
 
   const getStatusBadge = (status: string) => {
@@ -192,51 +198,127 @@ const OrderHistory = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>{t('orders.id')}</TableHead>
-                        <TableHead>{t('orders.products')}</TableHead>
-                        <TableHead>{t('orders.quantity')}</TableHead>
+                        <TableHead>{t('orders.totalItems')}</TableHead>
                         <TableHead>{t('orders.date')}</TableHead>
                         <TableHead>{t('orders.status')}</TableHead>
                         <TableHead>{t('orders.total')}</TableHead>
+                        <TableHead className="w-12"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-mono text-sm">
-                            #{order.id.slice(-8)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {order.order_items.map((item, index) => (
-                                <div key={index} className="text-sm">
-                                  {item.items.name}
+                        <Dialog key={order.id}>
+                          <DialogTrigger asChild>
+                            <TableRow className="cursor-pointer hover:bg-accent transition-colors">
+                              <TableCell className="font-medium">
+                                {getTotalItems(order)} {t('orders.items')}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Calendar className="h-4 w-4" />
+                                  {format(new Date(order.created_at), 'dd/MM/yyyy')}
                                 </div>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {order.order_items.map((item, index) => (
-                                <div key={index} className="text-sm">
-                                  {item.quantity}x
+                              </TableCell>
+                              <TableCell>
+                                {getStatusBadge(order.status)}
+                              </TableCell>
+                              <TableCell className="font-semibold">
+                                €{order.total_amount}
+                              </TableCell>
+                              <TableCell>
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              </TableCell>
+                            </TableRow>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <Package className="h-5 w-5" />
+                                {t('orders.orderDetails')} #{order.id.slice(-8)}
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-6">
+                              {/* Informations générales */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">
+                                    {t('orders.date')}
+                                  </label>
+                                  <p className="font-medium">
+                                    {format(new Date(order.created_at), 'dd/MM/yyyy HH:mm')}
+                                  </p>
                                 </div>
-                              ))}
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">
+                                    {t('orders.status')}
+                                  </label>
+                                  <div className="mt-1">
+                                    {getStatusBadge(order.status)}
+                                  </div>
+                                </div>
+                                {order.collection_points && (
+                                  <div className="col-span-2">
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                      {t('orders.collectionPoint')}
+                                    </label>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <MapPin className="h-4 w-4" />
+                                      <span>{order.collection_points.name}</span>
+                                      <span className="text-muted-foreground">
+                                        - {order.collection_points.location}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Détails des produits */}
+                              <div>
+                                <h4 className="font-medium mb-3">{t('orders.orderItems')}</h4>
+                                <div className="border rounded-lg overflow-hidden">
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>{t('orders.product')}</TableHead>
+                                        <TableHead className="text-center">{t('orders.quantity')}</TableHead>
+                                        <TableHead className="text-right">{t('orders.unitPrice')}</TableHead>
+                                        <TableHead className="text-right">{t('orders.subtotal')}</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {order.order_items.map((item, index) => (
+                                        <TableRow key={index}>
+                                          <TableCell className="font-medium">
+                                            {item.items.name}
+                                          </TableCell>
+                                          <TableCell className="text-center">
+                                            {item.quantity}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            €{item.unit_price}
+                                          </TableCell>
+                                          <TableCell className="text-right font-medium">
+                                            €{(item.quantity * item.unit_price).toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </div>
+
+                              {/* Total */}
+                              <div className="flex justify-between items-center pt-4 border-t">
+                                <span className="text-lg font-medium">
+                                  {t('orders.total')}:
+                                </span>
+                                <span className="text-xl font-bold">
+                                  €{order.total_amount}
+                                </span>
+                              </div>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2 text-sm">
-                              <Calendar className="h-4 w-4" />
-                              {format(new Date(order.created_at), 'dd/MM/yyyy')}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(order.status)}
-                          </TableCell>
-                          <TableCell className="font-semibold">
-                            €{order.total_amount}
-                          </TableCell>
-                        </TableRow>
+                          </DialogContent>
+                        </Dialog>
                       ))}
                     </TableBody>
                   </Table>
