@@ -121,6 +121,9 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
   };
 
   const handlePlaceOrder = async () => {
+    // Prevent multiple clicks
+    if (isLoading) return;
+    
     if (!user || !profile) {
       toast({
         title: t.loginRequired,
@@ -149,6 +152,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
     }
 
     setIsLoading(true);
+    console.log('Starting order creation for user:', user.id, 'with items:', cartItems.length);
 
     try {
       // Create order in database
@@ -163,7 +167,12 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error('Error creating order:', orderError);
+        throw orderError;
+      }
+
+      console.log('Order created successfully:', orderData.id);
 
       // Create order items
       const orderItems = cartItems.map(item => ({
@@ -173,21 +182,35 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
         unit_price: item.price
       }));
 
+      console.log('Inserting order items:', orderItems.length);
       const { error: itemsError } = await supabase
         .from('order_items')
         .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Error creating order items:', itemsError);
+        // If order items fail, clean up the order
+        await supabase.from('orders').delete().eq('id', orderData.id);
+        throw itemsError;
+      }
+
+      console.log('Order items created successfully');
 
       // Update stock for each item
+      console.log('Updating stock for items...');
       for (const item of cartItems) {
         const { error: stockError } = await (supabase as any).rpc('update_item_stock', {
           item_id: item.id,
           quantity_to_subtract: item.quantity
         });
 
-        if (stockError) throw stockError;
+        if (stockError) {
+          console.error('Error updating stock for item:', item.id, stockError);
+          throw stockError;
+        }
       }
+
+      console.log('Stock updated successfully');
 
       // Get collection point details
       const selectedPoint = collectionPoints.find(p => p.id === selectedCollectionPoint);
@@ -209,8 +232,10 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       };
 
       // Send order confirmation email
+      console.log('Sending order confirmation email...');
       await sendOrderConfirmation(orderConfirmationData);
 
+      console.log('Order process completed successfully for order:', orderData.id);
       toast({
         title: t.orderSuccess,
         description: t.orderSuccessDesc,
