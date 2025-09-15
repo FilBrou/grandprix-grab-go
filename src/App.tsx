@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import OrderDemo from "./pages/OrderDemo";
+import OrderHistory from "./pages/OrderHistory";
 import CartPage from "./pages/Cart";
 import CheckoutPage from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,7 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/order" element={<OrderDemo />} />
+                  <Route path="/orders" element={<OrderHistory />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
