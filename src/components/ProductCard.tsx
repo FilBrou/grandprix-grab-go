@@ -3,7 +3,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ShoppingCart, Minus, Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 interface Product {
@@ -31,6 +32,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     isLoading
   } = useCart();
   const [imageError, setImageError] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   
   // Générer une couleur basée sur la catégorie
   const getCategoryColor = (category: string) => {
@@ -52,14 +54,36 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const imageUrl = product.image || product.image_url || fallbackImageUrl;
 
   const handleAddToCart = async () => {
-    await addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      category: product.category,
-      stock: product.stock,
-      image_url: imageUrl
-    });
+    for (let i = 0; i < quantity; i++) {
+      await addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        stock: product.stock,
+        image_url: imageUrl
+      });
+    }
+    setQuantity(1); // Reset quantity after adding to cart
+  };
+
+  const incrementQuantity = () => {
+    if (quantity < product.stock) {
+      setQuantity(prev => prev + 1);
+    }
+  };
+
+  const decrementQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1);
+    }
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    if (value >= 1 && value <= product.stock) {
+      setQuantity(value);
+    }
   };
   return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
         <AspectRatio ratio={16 / 9} className={`${getCategoryColor(product.category)} flex items-center justify-center`}>
@@ -91,15 +115,56 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {product.description}
         </p>
         
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between">
+          <span className="text-2xl font-bold text-primary">
+            €{product.price}
+          </span>
           <span className="text-sm text-muted-foreground">
             Stock: {product.stock}
           </span>
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0">
-        <Button onClick={handleAddToCart} disabled={!product.available || product.stock === 0 || isLoading} className="w-full" variant={product.available && product.stock > 0 ? "default" : "secondary"}>
+      <CardFooter className="p-4 pt-0 space-y-3">
+        {/* Quantity Controls */}
+        {product.available && product.stock > 0 && (
+          <div className="flex items-center justify-center space-x-3 w-full">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={decrementQuantity}
+              disabled={quantity <= 1}
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              value={quantity}
+              onChange={handleQuantityChange}
+              className="w-16 text-center h-8"
+              min={1}
+              max={product.stock}
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={incrementQuantity}
+              disabled={quantity >= product.stock}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        
+        {/* Add to Cart Button */}
+        <Button 
+          onClick={handleAddToCart} 
+          disabled={!product.available || product.stock === 0 || isLoading} 
+          className="w-full" 
+          variant={product.available && product.stock > 0 ? "default" : "secondary"}
+        >
           <ShoppingCart className="mr-2 h-4 w-4" />
           {isLoading ? t('common.loading') : product.available && product.stock > 0 ? t('common.addToCart') : t('common.outOfStock')}
         </Button>
