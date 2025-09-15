@@ -34,7 +34,12 @@ const Header = () => {
           <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate('/')}>
             {t('nav.home')}
           </Button>
-          <Button variant="ghost" className="text-sm font-medium">
+          <Button variant="ghost" className="text-sm font-medium" onClick={() => {
+            window.scrollTo({
+              top: window.innerHeight,
+              behavior: 'smooth'
+            });
+          }}>
             {t('nav.catalog')}
           </Button>
           <Button variant="ghost" className="text-sm font-medium">
