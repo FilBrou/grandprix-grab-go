@@ -138,7 +138,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Quantity Controls */}
         {product.available && product.stock > 0 && (
-          <div className="flex items-center justify-center space-x-2 w-full">
+          <div className="flex items-center justify-center space-x-2 w-full bg-card/80 border rounded-md p-2 shadow-sm">
             <Button
               variant="outline"
               size="sm"
