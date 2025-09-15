@@ -25,7 +25,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   product
 }) => {
   const {
-    t
+    t,
+    language
   } = useLanguage();
   const {
     addToCart,
@@ -85,86 +86,92 @@ const ProductCard: React.FC<ProductCardProps> = ({
       setQuantity(value);
     }
   };
-  return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-        <AspectRatio ratio={16 / 9} className={`${getCategoryColor(product.category)} flex items-center justify-center`}>
-          {!imageError ? (
-            <img
-              src={imageUrl}
-              alt={`${product.name} - ${t('category.' + product.category)}`}
-              loading="lazy"
-              className="h-full w-full object-cover"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full w-full text-muted-foreground">
-              <div className="text-4xl mb-2">🍷</div>
-              <span className="text-sm font-medium">{t(`category.${product.category}`)}</span>
-            </div>
-          )}
-        </AspectRatio>
+  return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1" style={{backgroundColor: '#F5F5F5'}}>
+        {/* Removed AspectRatio image section - using plain background instead */}
+        <div className="h-32 flex items-center justify-center" style={{backgroundColor: '#F5F5F5'}}>
+          <div className="text-4xl mb-2">🍷</div>
+        </div>
 
-        <CardContent className="p-4">
+        <CardContent className="p-4" style={{color: '#000000'}}>
         <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold text-lg leading-tight">{product.name}</h3>
-          <Badge variant="outline" className="ml-2 shrink-0">
+          <h3 className="font-semibold text-lg leading-tight" style={{color: '#000000'}}>{product.name}</h3>
+          <Badge variant="outline" className="ml-2 shrink-0" style={{color: '#000000'}}>
             {t(`category.${product.category}`)}
           </Badge>
         </div>
         
-        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+        <p className="text-sm mb-3 line-clamp-2" style={{color: '#000000'}}>
           {product.description}
         </p>
         
         <div className="flex items-center justify-end">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm" style={{color: '#000000'}}>
             Stock: {product.stock}
           </span>
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 space-y-3">
+      <CardFooter className="p-4 pt-0 flex flex-col gap-4">
         {/* Quantity Controls */}
         {product.available && product.stock > 0 && (
-          <div className="flex items-center justify-center gap-1 w-full bg-card/80 border rounded-md p-2 shadow-sm">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 w-9 border-2"
-              onClick={decrementQuantity}
-              disabled={quantity <= 1}
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <Input
-              type="number"
-              value={quantity}
-              onChange={handleQuantityChange}
-              className="w-20 text-center h-9 font-medium"
-              min={1}
-              max={product.stock}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 w-9 border-2"
-              onClick={incrementQuantity}
-              disabled={quantity >= product.stock}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+          <div className="w-full">
+            <label className="text-sm font-medium mb-2 block" style={{color: '#000000'}}>
+              {t('common.quantity')}:
+            </label>
+            <div className="flex items-center justify-center gap-2 w-full bg-white border rounded-md p-2 shadow-sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 w-9 border-2"
+                onClick={decrementQuantity}
+                disabled={quantity <= 1}
+                style={{borderColor: '#000000'}}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <Input
+                type="number"
+                value={quantity}
+                onChange={handleQuantityChange}
+                className="w-20 text-center h-9 font-medium"
+                min={1}
+                max={product.stock}
+                style={{color: '#000000'}}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 w-9 border-2"
+                onClick={incrementQuantity}
+                disabled={quantity >= product.stock}
+                style={{borderColor: '#000000'}}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
 
         {/* Add to Cart Button */}
         <Button 
           onClick={handleAddToCart} 
-          disabled={!product.available || product.stock === 0 || isLoading} 
-          className="w-full h-10 text-sm" 
-          variant={product.available && product.stock > 0 ? "default" : "secondary"}
+          disabled={!product.available || product.stock === 0 || isLoading}
+          className="w-full h-12 text-base font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-lg"
+          style={{
+            backgroundColor: product.stock === 0 ? '#CCCCCC' : '#FF0000',
+            color: '#FFFFFF',
+            borderColor: '#FFFFFF',
+            padding: '10px'
+          }}
         >
-          <ShoppingCart className="mr-2 h-4 w-4 shrink-0" />
+          <ShoppingCart className="mr-2 h-5 w-5 shrink-0" />
           <span className="truncate">
-            {isLoading ? t('common.loading') : product.available && product.stock > 0 ? t('common.addToCart') : t('common.outOfStock')}
+            {isLoading 
+              ? t('common.loading') 
+              : product.available && product.stock > 0 
+                ? (language === 'fr' ? 'Ajouter' : 'Add to Cart')
+                : t('common.outOfStock')
+            }
           </span>
         </Button>
       </CardFooter>
