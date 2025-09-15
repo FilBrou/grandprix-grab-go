@@ -162,11 +162,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Button 
           onClick={handleAddToCart} 
           disabled={!product.available || product.stock === 0 || isLoading} 
-          className="w-full" 
+          className="w-full h-10 text-sm" 
           variant={product.available && product.stock > 0 ? "default" : "secondary"}
         >
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          {isLoading ? t('common.loading') : product.available && product.stock > 0 ? t('common.addToCart') : t('common.outOfStock')}
+          <ShoppingCart className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {isLoading ? t('common.loading') : product.available && product.stock > 0 ? t('common.addToCart') : t('common.outOfStock')}
+          </span>
         </Button>
       </CardFooter>
     </Card>;
