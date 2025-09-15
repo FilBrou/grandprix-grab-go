@@ -234,6 +234,25 @@ const translations = {
     'checkout.subtitle': 'Finaliza tu pedido para el Gran Premio de Montreal',
     'checkout.backToCart': 'Volver al carrito',
     
+    // Orders
+    'orders.history': 'Historique des commandes',
+    'orders.noOrders': 'Aucune commande trouvée',
+    'orders.id': 'ID',
+    'orders.products': 'Produits',
+    'orders.quantity': 'Quantité',
+    'orders.date': 'Date',
+    'orders.status': 'Statut',
+    'orders.total': 'Total',
+    'orders.filterByStatus': 'Filtrer par statut',
+    'orders.allStatuses': 'Tous les statuts',
+    'orders.pending': 'En attente',
+    'orders.confirmed': 'Confirmée',
+    'orders.ready': 'Prête',
+    'orders.completed': 'Terminée',
+    'orders.cancelled': 'Annulée',
+    'orders.sortByDate': 'Trier par date',
+    'orders.noMatchingOrders': 'Aucune commande ne correspond aux filtres sélectionnés.',
+    
     // Language names
     'language.en': 'English',
     'language.zh': '中文',
@@ -291,6 +310,25 @@ const translations = {
     'checkout.title': 'Validation de commande',
     'checkout.subtitle': 'Finalisez votre commande pour le Grand Prix de Montréal',
     'checkout.backToCart': 'Retour au panier',
+    
+    // Orders
+    'orders.history': 'Order History',
+    'orders.noOrders': 'No orders found',
+    'orders.id': 'ID',
+    'orders.products': 'Products',
+    'orders.quantity': 'Quantity',
+    'orders.date': 'Date',
+    'orders.status': 'Status',
+    'orders.total': 'Total',
+    'orders.filterByStatus': 'Filter by Status',
+    'orders.allStatuses': 'All Statuses',
+    'orders.pending': 'Pending',
+    'orders.confirmed': 'Confirmed',
+    'orders.ready': 'Ready',
+    'orders.completed': 'Completed',
+    'orders.cancelled': 'Cancelled',
+    'orders.sortByDate': 'Sort by Date',
+    'orders.noMatchingOrders': 'No orders match the selected filters.',
     
     // Language names
     'language.en': 'English',

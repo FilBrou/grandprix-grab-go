@@ -105,7 +105,16 @@ const OrderHistory = () => {
       completed: 'default',
       cancelled: 'destructive'
     };
-    return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
+    
+    const statusTranslations: Record<string, string> = {
+      pending: t('orders.pending'),
+      confirmed: t('orders.confirmed'),
+      ready: t('orders.ready'),
+      completed: t('orders.completed'),
+      cancelled: t('orders.cancelled')
+    };
+    
+    return <Badge variant={variants[status] || 'secondary'}>{statusTranslations[status] || status}</Badge>;
   };
 
   if (loading) {
@@ -147,18 +156,18 @@ const OrderHistory = () => {
               {/* Filtres */}
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium">Statut:</label>
+                  <label className="text-sm font-medium">{t('orders.filterByStatus')}:</label>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Tous les statuts" />
+                      <SelectValue placeholder={t('orders.allStatuses')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tous les statuts</SelectItem>
-                      <SelectItem value="pending">En attente</SelectItem>
-                      <SelectItem value="confirmed">Confirmé</SelectItem>
-                      <SelectItem value="ready">Prêt</SelectItem>
-                      <SelectItem value="completed">Terminé</SelectItem>
-                      <SelectItem value="cancelled">Annulé</SelectItem>
+                      <SelectItem value="all">{t('orders.allStatuses')}</SelectItem>
+                      <SelectItem value="pending">{t('orders.pending')}</SelectItem>
+                      <SelectItem value="confirmed">{t('orders.confirmed')}</SelectItem>
+                      <SelectItem value="ready">{t('orders.ready')}</SelectItem>
+                      <SelectItem value="completed">{t('orders.completed')}</SelectItem>
+                      <SelectItem value="cancelled">{t('orders.cancelled')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -169,7 +178,7 @@ const OrderHistory = () => {
                     className="flex items-center gap-2"
                   >
                     <ArrowUpDown className="h-4 w-4" />
-                    Date {sortOrder === 'asc' ? '↑' : '↓'}
+                    {t('orders.sortByDate')} {sortOrder === 'asc' ? '↑' : '↓'}
                   </Button>
                 </div>
               </div>
@@ -177,18 +186,18 @@ const OrderHistory = () => {
               {/* Tableau des commandes */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Historique des commandes</CardTitle>
+                  <CardTitle>{t('orders.history')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Produits</TableHead>
-                        <TableHead>Quantité</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Total</TableHead>
+                        <TableHead>{t('orders.id')}</TableHead>
+                        <TableHead>{t('orders.products')}</TableHead>
+                        <TableHead>{t('orders.quantity')}</TableHead>
+                        <TableHead>{t('orders.date')}</TableHead>
+                        <TableHead>{t('orders.status')}</TableHead>
+                        <TableHead>{t('orders.total')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -234,7 +243,7 @@ const OrderHistory = () => {
                   
                   {filteredOrders.length === 0 && orders.length > 0 && (
                     <div className="text-center py-8">
-                      <p className="text-muted-foreground">Aucune commande ne correspond aux filtres sélectionnés.</p>
+                      <p className="text-muted-foreground">{t('orders.noMatchingOrders')}</p>
                     </div>
                   )}
                 </CardContent>
