@@ -18,7 +18,6 @@ interface Order {
   id: string;
   created_at: string;
   total_amount: number;
-  status: string;
   collection_point_id: string | null;
   order_items: Array<{
     quantity: number;
@@ -38,9 +37,7 @@ const OrderHistory = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -55,7 +52,6 @@ const OrderHistory = () => {
             id,
             created_at,
             total_amount,
-            status,
             collection_point_id,
             order_items (
               quantity,
@@ -85,42 +81,12 @@ const OrderHistory = () => {
     fetchOrders();
   }, [user, sortOrder]);
 
-  useEffect(() => {
-    let filtered = [...orders];
-    
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(order => order.status === statusFilter);
-    }
-
-    setFilteredOrders(filtered);
-  }, [orders, statusFilter]);
-
   const handleSortToggle = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
 
   const getTotalItems = (order: Order) => {
     return order.order_items.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      pending: 'secondary',
-      confirmed: 'default',
-      ready: 'outline',
-      completed: 'default',
-      cancelled: 'destructive'
-    };
-    
-    const statusTranslations: Record<string, string> = {
-      pending: t('orders.pending'),
-      confirmed: t('orders.confirmed'),
-      ready: t('orders.ready'),
-      completed: t('orders.completed'),
-      cancelled: t('orders.cancelled')
-    };
-    
-    return <Badge variant={variants[status] || 'secondary'}>{statusTranslations[status] || status}</Badge>;
   };
 
   if (loading) {
@@ -150,7 +116,7 @@ const OrderHistory = () => {
             <h1 className="text-2xl font-bold">{t('orders.history')}</h1>
           </div>
 
-          {filteredOrders.length === 0 && orders.length === 0 ? (
+          {orders.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
                 <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -159,34 +125,16 @@ const OrderHistory = () => {
             </Card>
           ) : (
             <>
-              {/* Filtres */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium">{t('orders.filterByStatus')}:</label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder={t('orders.allStatuses')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t('orders.allStatuses')}</SelectItem>
-                      <SelectItem value="pending">{t('orders.pending')}</SelectItem>
-                      <SelectItem value="confirmed">{t('orders.confirmed')}</SelectItem>
-                      <SelectItem value="ready">{t('orders.ready')}</SelectItem>
-                      <SelectItem value="completed">{t('orders.completed')}</SelectItem>
-                      <SelectItem value="cancelled">{t('orders.cancelled')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleSortToggle}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowUpDown className="h-4 w-4" />
-                    {t('orders.sortByDate')} {sortOrder === 'asc' ? '↑' : '↓'}
-                  </Button>
-                </div>
+              {/* Sort Controls */}
+              <div className="flex justify-end mb-6">
+                <Button 
+                  variant="outline" 
+                  onClick={handleSortToggle}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                  {t('orders.sortByDate')} {sortOrder === 'asc' ? '↑' : '↓'}
+                </Button>
               </div>
 
               {/* Tableau des commandes */}
@@ -200,13 +148,12 @@ const OrderHistory = () => {
                       <TableRow>
                         <TableHead>{t('orders.totalItems')}</TableHead>
                         <TableHead>{t('orders.date')}</TableHead>
-                        <TableHead>{t('orders.status')}</TableHead>
                         <TableHead>{t('orders.total')}</TableHead>
                         <TableHead className="w-12"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredOrders.map((order) => (
+                      {orders.map((order) => (
                         <Dialog key={order.id}>
                           <DialogTrigger asChild>
                             <TableRow className="cursor-pointer hover:bg-accent transition-colors">
@@ -218,9 +165,6 @@ const OrderHistory = () => {
                                   <Calendar className="h-4 w-4" />
                                   {format(new Date(order.created_at), 'dd/MM/yyyy')}
                                 </div>
-                              </TableCell>
-                              <TableCell>
-                                {getStatusBadge(order.status)}
                               </TableCell>
                               <TableCell className="font-semibold">
                                 €{order.total_amount}
@@ -239,7 +183,7 @@ const OrderHistory = () => {
                             </DialogHeader>
                             <div className="space-y-6">
                               {/* Informations générales */}
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 gap-4">
                                 <div>
                                   <label className="text-sm font-medium text-muted-foreground">
                                     {t('orders.date')}
@@ -248,16 +192,8 @@ const OrderHistory = () => {
                                     {format(new Date(order.created_at), 'dd/MM/yyyy HH:mm')}
                                   </p>
                                 </div>
-                                <div>
-                                  <label className="text-sm font-medium text-muted-foreground">
-                                    {t('orders.status')}
-                                  </label>
-                                  <div className="mt-1">
-                                    {getStatusBadge(order.status)}
-                                  </div>
-                                </div>
                                 {order.collection_points && (
-                                  <div className="col-span-2">
+                                  <div>
                                     <label className="text-sm font-medium text-muted-foreground">
                                       {t('orders.collectionPoint')}
                                     </label>
@@ -322,12 +258,6 @@ const OrderHistory = () => {
                       ))}
                     </TableBody>
                   </Table>
-                  
-                  {filteredOrders.length === 0 && orders.length > 0 && (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">{t('orders.noMatchingOrders')}</p>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </>
