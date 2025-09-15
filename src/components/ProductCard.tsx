@@ -115,10 +115,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {product.description}
         </p>
         
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold text-primary">
-            €{product.price}
-          </span>
+        <div className="flex items-center justify-end">
           <span className="text-sm text-muted-foreground">
             Stock: {product.stock}
           </span>
