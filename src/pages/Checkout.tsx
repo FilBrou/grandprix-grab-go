@@ -15,7 +15,7 @@ const CheckoutPage: React.FC = () => {
 
   const handleOrderSuccess = () => {
     clearCart();
-    navigate('/');
+    navigate('/order-history');
   };
 
   return (
