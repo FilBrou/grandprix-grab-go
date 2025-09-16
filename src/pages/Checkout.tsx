@@ -15,7 +15,8 @@ const CheckoutPage: React.FC = () => {
 
   const handleOrderSuccess = () => {
     clearCart();
-    navigate('/orders');
+    navigate('/orders', { replace: true });
+    window.scrollTo(0, 0);
   };
 
   return (
