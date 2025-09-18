@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useMondayIntegration } from '@/hooks/useMondayIntegration';
 import { Loader2, ShoppingCart, MapPin } from 'lucide-react';
 import CollectionPointSelector from './CollectionPointSelector';
 
@@ -43,6 +44,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
   const { user, profile } = useAuth();
   const { sendOrderConfirmation } = useNotifications();
   const { toast } = useToast();
+  const { createItem } = useMondayIntegration();
 
   const translations = {
     fr: {
@@ -117,6 +119,38 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       });
     } finally {
       setIsLoadingPoints(false);
+    }
+  };
+
+  const createMondayOrderItem = async (order: any, collectionPoint: CollectionPoint) => {
+    try {
+      const config = localStorage.getItem('monday-orders-config');
+      if (!config) return;
+
+      const parsedConfig = JSON.parse(config);
+      if (!parsedConfig.autoSync || !parsedConfig.boardId) return;
+
+      const orderNumber = `Commande #${order.id.slice(-8)}`;
+      const clientInfo = `${user?.email}`;
+      const itemsList = cartItems.map(item => 
+        `${item.quantity}x ${item.name} (${item.price}€)`
+      ).join(', ');
+
+      await createItem(parsedConfig.boardId, orderNumber, {
+        text: clientInfo,
+        status: 'En attente',
+        numbers: totalAmount.toString(),
+        text8: `${collectionPoint.name} - ${collectionPoint.location}`,
+        long_text: itemsList,
+        date: new Date().toISOString().split('T')[0],
+        email: user?.email,
+        text0: order.id // ID complet pour référence
+      });
+
+      console.log('Commande synchronisée avec Monday:', orderNumber);
+    } catch (error) {
+      console.error('Erreur synchronisation Monday:', error);
+      // On ne fait pas échouer la commande si Monday échoue
     }
   };
 
@@ -234,6 +268,11 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       // Send order confirmation email
       console.log('Sending order confirmation email...');
       await sendOrderConfirmation(orderConfirmationData);
+
+      // Synchronize with Monday.com (async, non-blocking)
+      if (selectedPoint) {
+        createMondayOrderItem(orderData, selectedPoint);
+      }
 
       console.log('Order process completed successfully for order:', orderData.id);
       toast({

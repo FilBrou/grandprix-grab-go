@@ -19,6 +19,7 @@ import ItemsManager from './ItemsManager';
 import OrdersManager from './OrdersManager';
 import ReportsManager from './ReportsManager';
 import MondayIntegration from '../MondayIntegration';
+import MondayOrdersConfig from './MondayOrdersConfig';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('items');
@@ -165,6 +166,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
+                    <MondayOrdersConfig />
                     <div>
                       <h3 className="text-lg font-semibold mb-4">{t.integrations}</h3>
                       <MondayIntegration />

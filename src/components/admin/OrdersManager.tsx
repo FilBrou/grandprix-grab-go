@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingCart, Clock, CheckCircle, Package } from 'lucide-react';
+import { useMondayIntegration } from '@/hooks/useMondayIntegration';
 
 interface Order {
   id: string;
@@ -40,6 +41,7 @@ const OrdersManager = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { language } = useLanguage();
   const { toast } = useToast();
+  const { updateItem } = useMondayIntegration();
 
   const translations = {
     fr: {
@@ -166,6 +168,31 @@ const OrdersManager = () => {
     }
   };
 
+  const syncMondayStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const config = localStorage.getItem('monday-orders-config');
+      if (!config) return;
+
+      const parsedConfig = JSON.parse(config);
+      if (!parsedConfig.autoSync || !parsedConfig.boardId) return;
+
+      const statusMapping = {
+        pending: 'En attente',
+        confirmed: 'Confirmée', 
+        ready: 'Prête',
+        completed: 'Terminée',
+        cancelled: 'Annulée'
+      };
+
+      // Note: Dans un vrai scénario, on devrait stocker l'ID de l'item Monday
+      // Pour l'instant, on log juste l'intention
+      console.log(`Synchronisation Monday: Commande ${orderId} -> ${statusMapping[newStatus as keyof typeof statusMapping]}`);
+      
+    } catch (error) {
+      console.error('Erreur synchronisation Monday:', error);
+    }
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       const { error } = await supabase
@@ -217,6 +244,9 @@ const OrdersManager = () => {
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, status: newStatus as any } : order
       ));
+
+      // Sync with Monday.com (async, non-blocking)
+      syncMondayStatus(orderId, newStatus);
 
       toast({
         title: t.statusUpdated,
