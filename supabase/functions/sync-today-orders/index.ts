@@ -30,10 +30,6 @@ interface Order {
       name: string;
     };
   }>;
-  profiles: {
-    email: string;
-    name: string;
-  };
 }
 
 async function createMondayItem(boardId: string, orderNumber: string, columnValues: any) {
@@ -108,10 +104,6 @@ serve(async (req) => {
           items (
             name
           )
-        ),
-        profiles (
-          email,
-          name
         )
       `)
       .gte('created_at', `${today}T00:00:00.000Z`)
@@ -139,10 +131,20 @@ serve(async (req) => {
     let syncedCount = 0;
     let errors: string[] = [];
 
+    // Fetch user profiles separately for better performance
+    const userIds = [...new Set(orders.map(order => order.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, email, name')
+      .in('user_id', userIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
     for (const order of orders as Order[]) {
       try {
         const orderNumber = `Commande #${order.id.slice(-8)}`;
-        const clientInfo = order.profiles?.email || 'Email non disponible';
+        const profile = profileMap.get(order.user_id);
+        const clientInfo = profile?.email || 'Email non disponible';
         
         // Build items list
         const itemsList = order.order_items.map(item => 
@@ -162,7 +164,7 @@ serve(async (req) => {
           text_mkvx47hv: collectionPointInfo,
           long_text_mkvxr408: itemsList,
           date_mkvxze2g: new Date(order.created_at).toISOString().split('T')[0],
-          email_mkvxnk9v: order.profiles?.email || '',
+          email_mkvxnk9v: profile?.email || '',
           text_mkvxqz78: order.id
         });
 
