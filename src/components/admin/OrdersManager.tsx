@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Clock, CheckCircle, Package } from 'lucide-react';
+import { ShoppingCart, Clock, CheckCircle, Package, Send } from 'lucide-react';
 import { useMondayIntegration } from '@/hooks/useMondayIntegration';
 
 interface Order {
@@ -39,6 +39,7 @@ const OrdersManager = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [syncingOrders, setSyncingOrders] = useState<Set<string>>(new Set());
   const { language } = useLanguage();
   const { toast } = useToast();
   const { updateItem } = useMondayIntegration();
@@ -86,7 +87,11 @@ const OrdersManager = () => {
       statusUpdated: 'Status updated successfully',
       error: 'Error',
       noOrders: 'No orders found',
-      unknown: 'Unknown'
+      unknown: 'Unknown',
+      sendToMonday: 'Send to Monday',
+      syncing: 'Syncing...',
+      syncSuccess: 'Order synced with Monday',
+      syncError: 'Error syncing with Monday'
     }
   };
 
@@ -261,6 +266,66 @@ const OrdersManager = () => {
     }
   };
 
+  const syncOrderToMonday = async (orderId: string) => {
+    const config = localStorage.getItem('monday-orders-config');
+    if (!config) {
+      toast({
+        title: t.error,
+        description: 'Monday integration not configured',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const parsedConfig = JSON.parse(config);
+    if (!parsedConfig.boardId) {
+      toast({
+        title: t.error,
+        description: 'Monday board not selected',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSyncingOrders(prev => new Set(prev).add(orderId));
+
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-order-by-id', {
+        body: { 
+          orderId: orderId,
+          boardId: parsedConfig.boardId
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Error calling sync function');
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Sync failed');
+      }
+
+      toast({
+        title: t.syncSuccess,
+        description: `Monday ID: ${data.mondayItemId}`,
+      });
+
+    } catch (error: any) {
+      console.error('Error syncing order to Monday:', error);
+      toast({
+        title: t.syncError,
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setSyncingOrders(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
+    }
+  };
+
   const filteredOrders = statusFilter === 'all' 
     ? orders 
     : orders.filter(order => order.status === statusFilter);
@@ -371,21 +436,33 @@ const OrdersManager = () => {
                           {formatDate(order.created_at)}
                         </TableCell>
                         <TableCell>
-                          <Select
-                            value={order.status}
-                            onValueChange={(value) => updateOrderStatus(order.id, value)}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">{t.pending}</SelectItem>
-                              <SelectItem value="confirmed">{t.confirmed}</SelectItem>
-                              <SelectItem value="ready">{t.ready}</SelectItem>
-                              <SelectItem value="completed">{t.completed}</SelectItem>
-                              <SelectItem value="cancelled">{t.cancelled}</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value={order.status}
+                              onValueChange={(value) => updateOrderStatus(order.id, value)}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">{t.pending}</SelectItem>
+                                <SelectItem value="confirmed">{t.confirmed}</SelectItem>
+                                <SelectItem value="ready">{t.ready}</SelectItem>
+                                <SelectItem value="completed">{t.completed}</SelectItem>
+                                <SelectItem value="cancelled">{t.cancelled}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => syncOrderToMonday(order.id)}
+                              disabled={syncingOrders.has(order.id)}
+                              className="flex items-center gap-1"
+                            >
+                              <Send className="h-3 w-3" />
+                              {syncingOrders.has(order.id) ? t.syncing : t.sendToMonday}
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

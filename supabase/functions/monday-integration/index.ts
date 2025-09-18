@@ -89,8 +89,90 @@ async function getBoardItems(boardId: string) {
   return await makeMondayRequest(query, { boardId: [parseInt(boardId)] });
 }
 
+// Normalize column values based on column type
+function normalizeColumnValues(columnValues: any, columns: any[]): any {
+  if (!columnValues || !columns) return columnValues;
+
+  const normalized: any = {};
+  
+  for (const [key, value] of Object.entries(columnValues)) {
+    const column = columns.find(col => col.id === key);
+    if (!column) {
+      normalized[key] = value;
+      continue;
+    }
+
+    switch (column.type) {
+      case 'email':
+        // Email columns need {email: "...", text: "..."}
+        if (typeof value === 'string') {
+          // If it's a plain string, treat it as email
+          normalized[key] = {
+            email: value,
+            text: value.split('@')[0] // Use part before @ as display text
+          };
+        } else if (typeof value === 'object' && value !== null) {
+          // If it's already an object, keep it
+          normalized[key] = value;
+        } else {
+          normalized[key] = value;
+        }
+        break;
+      
+      case 'text':
+      case 'long_text':
+        // Text columns need plain strings
+        if (typeof value === 'object' && value !== null) {
+          normalized[key] = JSON.stringify(value);
+        } else {
+          normalized[key] = String(value || '');
+        }
+        break;
+      
+      case 'numbers':
+        // Number columns need numeric values
+        normalized[key] = typeof value === 'number' ? value : parseFloat(String(value)) || 0;
+        break;
+      
+      case 'status':
+        // Status columns need plain strings
+        normalized[key] = String(value || '');
+        break;
+      
+      case 'date':
+        // Date columns need date strings in YYYY-MM-DD format
+        if (value instanceof Date) {
+          normalized[key] = value.toISOString().split('T')[0];
+        } else if (typeof value === 'string') {
+          normalized[key] = value.split('T')[0]; // Remove time part if present
+        } else {
+          normalized[key] = value;
+        }
+        break;
+      
+      default:
+        normalized[key] = value;
+    }
+  }
+  
+  return normalized;
+}
+
 // Create a new item
 async function createItem(boardId: string, itemName: string, columnValues?: any) {
+  // Get board columns to normalize values
+  let normalizedColumnValues = columnValues;
+  if (columnValues) {
+    try {
+      const columnsResult = await getBoardColumns(boardId);
+      if (columnsResult.data?.boards?.[0]?.columns) {
+        normalizedColumnValues = normalizeColumnValues(columnValues, columnsResult.data.boards[0].columns);
+      }
+    } catch (error) {
+      console.warn('Could not fetch columns for normalization:', error);
+    }
+  }
+
   const query = `
     mutation ($boardId: ID!, $itemName: String!, $columnValues: JSON) {
       create_item (
@@ -114,7 +196,7 @@ async function createItem(boardId: string, itemName: string, columnValues?: any)
   return await makeMondayRequest(query, {
     boardId: parseInt(boardId),
     itemName,
-    columnValues: columnValues ? JSON.stringify(columnValues) : undefined
+    columnValues: normalizedColumnValues ? JSON.stringify(normalizedColumnValues) : undefined
   });
 }
 

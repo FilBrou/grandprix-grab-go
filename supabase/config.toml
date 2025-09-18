@@ -76,3 +76,6 @@ verify_jwt = true
 
 [functions.sync-today-orders]
 verify_jwt = false
+
+[functions.sync-order-by-id]
+verify_jwt = false
