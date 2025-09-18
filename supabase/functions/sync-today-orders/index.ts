@@ -171,11 +171,11 @@ serve(async (req) => {
     // Create a mapping of column titles to IDs
     columns.forEach(col => {
       const title = col.title.toLowerCase();
-      if (title.includes('client') || title.includes('email')) columnMap.set('client', { id: col.id, type: col.type });
+      if (title.includes('client') || title.includes('email') || title.includes('nom')) columnMap.set('client', { id: col.id, type: col.type });
       if (title.includes('statut') || title.includes('status')) columnMap.set('status', { id: col.id, type: col.type });
-      if (title.includes('montant') || title.includes('total')) columnMap.set('amount', { id: col.id, type: col.type });
-      if (title.includes('point') || title.includes('collecte')) columnMap.set('collection', { id: col.id, type: col.type });
-      if (title.includes('article') || title.includes('produit')) columnMap.set('items', { id: col.id, type: col.type });
+      if (title.includes('montant') || title.includes('total') || title.includes('prix')) columnMap.set('amount', { id: col.id, type: col.type });
+      if (title.includes('point') || title.includes('collecte') || title.includes('livraison')) columnMap.set('collection', { id: col.id, type: col.type });
+      if (title.includes('article') || title.includes('produit') || title.includes('item')) columnMap.set('items', { id: col.id, type: col.type });
       if (title.includes('date') && title.includes('commande')) columnMap.set('date', { id: col.id, type: col.type });
       if (title.includes('id') && title.includes('commande')) columnMap.set('order_id', { id: col.id, type: col.type });
     });
@@ -219,10 +219,12 @@ serve(async (req) => {
           if (clientCol.type === 'email') {
             columnValues[clientCol.id] = {
               email: profile?.email || '',
-              text: profile?.name || 'Client'
+              text: profile?.name || clientInfo
             };
+          } else if (clientCol.type === 'text') {
+            columnValues[clientCol.id] = profile?.name || clientInfo;
           } else {
-            columnValues[clientCol.id] = clientInfo;
+            columnValues[clientCol.id] = `${profile?.name || 'Client'} (${profile?.email || 'N/A'})`;
           }
         }
         
