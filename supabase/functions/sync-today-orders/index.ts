@@ -32,6 +32,41 @@ interface Order {
   }>;
 }
 
+async function getBoardColumns(boardId: string) {
+  const query = `
+    query($boardId: ID!) {
+      boards(ids: [$boardId]) {
+        columns {
+          id
+          title
+          type
+        }
+      }
+    }
+  `;
+
+  const response = await fetch('https://api.monday.com/v2', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${mondayApiToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query,
+      variables: { boardId }
+    })
+  });
+
+  const result = await response.json();
+  
+  if (result.errors) {
+    console.error('Monday API Error:', result.errors);
+    throw new Error(`Monday API Error: ${result.errors[0]?.message}`);
+  }
+
+  return result.data.boards[0]?.columns || [];
+}
+
 async function createMondayItem(boardId: string, orderNumber: string, columnValues: any) {
   const query = `
     mutation($boardId: ID!, $itemName: String!, $columnValues: JSON!) {
@@ -126,11 +161,27 @@ serve(async (req) => {
       });
     }
 
-    // Monday.com configuration - using hardcoded values for auto-sync
+    // Monday.com configuration
     const boardId = '10084208629'; // TableauCommandes board ID
-    let syncedCount = 0;
-    let errors: string[] = [];
+    
+    // Get board columns to map correctly
+    const columns = await getBoardColumns(boardId);
+    const columnMap = new Map();
+    
+    // Create a mapping of column titles to IDs
+    columns.forEach(col => {
+      const title = col.title.toLowerCase();
+      if (title.includes('client') || title.includes('email')) columnMap.set('client', { id: col.id, type: col.type });
+      if (title.includes('statut') || title.includes('status')) columnMap.set('status', { id: col.id, type: col.type });
+      if (title.includes('montant') || title.includes('total')) columnMap.set('amount', { id: col.id, type: col.type });
+      if (title.includes('point') || title.includes('collecte')) columnMap.set('collection', { id: col.id, type: col.type });
+      if (title.includes('article') || title.includes('produit')) columnMap.set('items', { id: col.id, type: col.type });
+      if (title.includes('date') && title.includes('commande')) columnMap.set('date', { id: col.id, type: col.type });
+      if (title.includes('id') && title.includes('commande')) columnMap.set('order_id', { id: col.id, type: col.type });
+    });
 
+    console.log('Detected columns:', Array.from(columnMap.entries()));
+    
     // Fetch user profiles separately for better performance
     const userIds = [...new Set(orders.map(order => order.user_id))];
     const { data: profiles } = await supabase
@@ -139,6 +190,9 @@ serve(async (req) => {
       .in('user_id', userIds);
 
     const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+    let syncedCount = 0;
+    let errors: string[] = [];
 
     for (const order of orders as Order[]) {
       try {
@@ -156,17 +210,66 @@ serve(async (req) => {
           ? `${order.collection_points.name} - ${order.collection_points.location}`
           : 'Point de collecte non défini';
 
+        // Build column values with proper formatting
+        const columnValues: any = {};
+        
+        // Client info (email column)
+        if (columnMap.has('client')) {
+          const clientCol = columnMap.get('client');
+          if (clientCol.type === 'email') {
+            columnValues[clientCol.id] = {
+              email: profile?.email || '',
+              text: profile?.name || 'Client'
+            };
+          } else {
+            columnValues[clientCol.id] = clientInfo;
+          }
+        }
+        
+        // Status
+        if (columnMap.has('status')) {
+          const statusCol = columnMap.get('status');
+          if (statusCol.type === 'color') {
+            columnValues[statusCol.id] = { label: 'En attente' };
+          } else {
+            columnValues[statusCol.id] = 'En attente';
+          }
+        }
+        
+        // Amount (numeric)
+        if (columnMap.has('amount')) {
+          const amountCol = columnMap.get('amount');
+          columnValues[amountCol.id] = parseFloat(order.total_amount.toString());
+        }
+        
+        // Collection point
+        if (columnMap.has('collection')) {
+          const collectionCol = columnMap.get('collection');
+          columnValues[collectionCol.id] = collectionPointInfo;
+        }
+        
+        // Items list
+        if (columnMap.has('items')) {
+          const itemsCol = columnMap.get('items');
+          columnValues[itemsCol.id] = itemsList;
+        }
+        
+        // Date
+        if (columnMap.has('date')) {
+          const dateCol = columnMap.get('date');
+          columnValues[dateCol.id] = new Date(order.created_at).toISOString().split('T')[0];
+        }
+        
+        // Order ID
+        if (columnMap.has('order_id')) {
+          const orderIdCol = columnMap.get('order_id');
+          columnValues[orderIdCol.id] = order.id;
+        }
+
+        console.log('Column values for order:', orderNumber, columnValues);
+
         // Create Monday.com item
-        const mondayItem = await createMondayItem(boardId, orderNumber, {
-          text_mkvx37km: clientInfo,
-          color_mkvxwgh5: 'En attente',
-          numeric_mkvxa8vr: order.total_amount.toString(),
-          text_mkvx47hv: collectionPointInfo,
-          long_text_mkvxr408: itemsList,
-          date_mkvxze2g: new Date(order.created_at).toISOString().split('T')[0],
-          email_mkvxnk9v: profile?.email || '',
-          text_mkvxqz78: order.id
-        });
+        const mondayItem = await createMondayItem(boardId, orderNumber, columnValues);
 
         console.log(`Successfully synced order ${orderNumber} (Monday ID: ${mondayItem.id})`);
         syncedCount++;
