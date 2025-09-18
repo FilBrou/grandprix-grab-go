@@ -52,9 +52,11 @@ const Header = () => {
           }}>
             {t('nav.catalog')}
           </Button>
-          <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate('/orders')}>
-            {t('nav.orders')}
-          </Button>
+          {user && (
+            <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate('/orders')}>
+              {t('nav.orders')}
+            </Button>
+          )}
         </nav>
 
         <div className="flex items-center space-x-4">
