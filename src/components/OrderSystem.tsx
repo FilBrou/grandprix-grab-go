@@ -138,7 +138,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
 
       await createItem(parsedConfig.boardId, orderNumber, {
         text_mkvx37km: clientInfo,
-        color_mkvxwgh5: 0, // WORKING ON IT (statut par défaut)
+        color_mkvxwgh5: 'En attente',
         numeric_mkvxa8vr: totalAmount.toString(),
         text_mkvx47hv: `${collectionPoint.name} - ${collectionPoint.location}`,
         long_text_mkvxr408: itemsList,
