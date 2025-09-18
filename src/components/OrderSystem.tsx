@@ -137,14 +137,14 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       ).join(', ');
 
       await createItem(parsedConfig.boardId, orderNumber, {
-        text: clientInfo,
-        status: 'En attente',
-        numbers: totalAmount.toString(),
-        text8: `${collectionPoint.name} - ${collectionPoint.location}`,
-        long_text: itemsList,
-        date: new Date().toISOString().split('T')[0],
-        email: user?.email,
-        text0: order.id // ID complet pour référence
+        text_mkvx37km: clientInfo,
+        color_mkvxwgh5: 'En attente',
+        numeric_mkvxa8vr: totalAmount.toString(),
+        text_mkvx47hv: `${collectionPoint.name} - ${collectionPoint.location}`,
+        long_text_mkvxr408: itemsList,
+        date_mkvxze2g: new Date().toISOString().split('T')[0],
+        email_mkvxnk9v: user?.email,
+        text_mkvxqz78: order.id // ID complet pour référence
       });
 
       console.log('Commande synchronisée avec Monday:', orderNumber);
