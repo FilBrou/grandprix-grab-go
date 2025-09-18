@@ -70,3 +70,6 @@ verify_jwt = false
 
 [functions.generate-product-images]
 verify_jwt = false
+
+[functions.monday-integration]
+verify_jwt = true

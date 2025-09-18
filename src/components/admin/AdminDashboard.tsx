@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import ItemsManager from './ItemsManager';
 import OrdersManager from './OrdersManager';
 import ReportsManager from './ReportsManager';
+import MondayIntegration from '../MondayIntegration';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('items');
@@ -33,6 +34,8 @@ const AdminDashboard = () => {
       orders: 'Commandes',
       reports: 'Rapports',
       settings: 'Paramètres',
+      integrations: 'Intégrations',
+      mondayIntegration: 'Monday.com',
       welcome: 'Bienvenue',
       role: 'Rôle',
       admin: 'Administrateur',
@@ -46,6 +49,8 @@ const AdminDashboard = () => {
       orders: 'Orders',
       reports: 'Reports',
       settings: 'Settings',
+      integrations: 'Integrations',
+      mondayIntegration: 'Monday.com',
       welcome: 'Welcome',
       role: 'Role',
       admin: 'Administrator',
@@ -152,13 +157,19 @@ const AdminDashboard = () => {
                 <CardHeader>
                   <CardTitle>{t.settings}</CardTitle>
                   <CardDescription>
-                    Configuration de la plateforme (à venir)
+                    {language === 'fr' 
+                      ? 'Configuration de la plateforme et intégrations' 
+                      : 'Platform configuration and integrations'
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">
-                    Les paramètres de configuration seront disponibles dans une prochaine version.
-                  </p>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">{t.integrations}</h3>
+                      <MondayIntegration />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
