@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Shield } from 'lucide-react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +19,18 @@ const Auth = () => {
   const { signIn, signUp } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Détecter si on vient de la route admin
+  const isAdminMode = location.state?.from === '/admin' || location.pathname === '/auth/admin';
+  
+  useEffect(() => {
+    // Si on vient de /admin, on met à jour l'URL pour l'indiquer
+    if (location.state?.from === '/admin' && location.pathname === '/auth') {
+      navigate('/auth/admin', { replace: true, state: location.state });
+    }
+  }, [location, navigate]);
 
   const translations = {
     fr: {
@@ -35,7 +47,11 @@ const Auth = () => {
       signInSuccess: 'Connexion réussie!',
       signUpSuccess: 'Inscription réussie! Vérifiez votre email.',
       error: 'Erreur',
-      adminLogin: 'Connexion Admin'
+      adminLogin: 'Connexion Admin',
+      adminMode: 'Mode Administrateur',
+      adminSignInDescription: 'Connectez-vous avec vos identifiants administrateur',
+      adminAccess: 'Accès Admin',
+      regularLogin: 'Connexion Standard'
     },
     en: {
       signIn: 'Sign In',
@@ -51,7 +67,11 @@ const Auth = () => {
       signInSuccess: 'Successfully signed in!',
       signUpSuccess: 'Successfully signed up! Check your email.',
       error: 'Error',
-      adminLogin: 'Admin Login'
+      adminLogin: 'Admin Login',
+      adminMode: 'Administrator Mode',
+      adminSignInDescription: 'Sign in with your administrator credentials',
+      adminAccess: 'Admin Access',
+      regularLogin: 'Standard Login'
     }
   };
 
@@ -74,7 +94,8 @@ const Auth = () => {
         toast({
           title: t.signInSuccess,
         });
-        navigate('/');
+        // Rediriger vers admin si on est en mode admin, sinon vers home
+        navigate(isAdminMode ? '/admin' : '/');
       }
     } catch (error) {
       toast({
@@ -131,14 +152,31 @@ const Auth = () => {
           {t.backToHome}
         </Button>
 
-        <Card className="border-primary/20 shadow-xl">
+        <Card className={`border-primary/20 shadow-xl ${isAdminMode ? 'border-orange-500/30 bg-gradient-to-br from-background to-orange-50/20' : ''}`}>
           <CardHeader className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary-foreground">GP</span>
+            {isAdminMode && (
+              <div className="mb-4">
+                <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/20 px-4 py-2">
+                  <Shield className="w-4 h-4 mr-2" />
+                  {t.adminMode}
+                </Badge>
+              </div>
+            )}
+            <div className={`w-16 h-16 mx-auto mb-4 ${isAdminMode ? 'bg-gradient-to-br from-orange-500 to-red-600' : 'bg-gradient-to-br from-primary to-accent'} rounded-full flex items-center justify-center`}>
+              {isAdminMode ? (
+                <Shield className="text-2xl text-white w-8 h-8" />
+              ) : (
+                <span className="text-2xl font-bold text-primary-foreground">GP</span>
+              )}
             </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Grand Prix Montréal
             </CardTitle>
+            {isAdminMode && (
+              <p className="text-sm text-orange-600 font-medium mt-2">
+                {t.adminAccess}
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
@@ -150,7 +188,9 @@ const Auth = () => {
               <TabsContent value="signin">
                 <Card>
                   <CardHeader>
-                    <CardDescription>{t.signInDescription}</CardDescription>
+                    <CardDescription>
+                      {isAdminMode ? t.adminSignInDescription : t.signInDescription}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleSignIn} className="space-y-4">
@@ -245,13 +285,24 @@ const Auth = () => {
             </Tabs>
             
             <div className="mt-6 pt-6 border-t border-border">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin')}
-                className="w-full text-muted-foreground hover:text-primary hover:bg-primary/5"
-              >
-                {t.adminLogin}
-              </Button>
+              {!isAdminMode ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/auth/admin')}
+                  className="w-full text-muted-foreground hover:text-orange-600 hover:bg-orange-50"
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  {t.adminLogin}
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/auth')}
+                  className="w-full text-muted-foreground hover:text-primary hover:bg-primary/5"
+                >
+                  {t.regularLogin}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

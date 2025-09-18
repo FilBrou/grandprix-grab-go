@@ -16,7 +16,7 @@ const Admin = () => {
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth/admin" replace state={{ from: '/admin' }} />;
   }
 
   if (!isAdmin) {
