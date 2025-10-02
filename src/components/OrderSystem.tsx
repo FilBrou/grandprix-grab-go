@@ -133,7 +133,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       const orderNumber = `Commande #${order.id.slice(-8)}`;
       const clientInfo = `${user?.email}`;
       const itemsList = cartItems.map(item => 
-        `${item.quantity}x ${item.name} (${item.price}€)`
+        `${item.quantity}x ${item.name} ($${item.price})`
       ).join(', ');
 
       await createItem(parsedConfig.boardId, orderNumber, {

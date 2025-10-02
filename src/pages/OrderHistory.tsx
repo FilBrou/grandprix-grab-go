@@ -176,7 +176,7 @@ const OrderHistory = () => {
                                 </div>
                               </TableCell>
                               <TableCell className="font-semibold">
-                                €{order.total_amount}
+                                ${order.total_amount}
                               </TableCell>
                               <TableCell>
                                 <Eye className="h-4 w-4 text-muted-foreground" />
@@ -240,10 +240,10 @@ const OrderHistory = () => {
                                             {item.quantity}
                                           </TableCell>
                                           <TableCell className="text-right">
-                                            €{item.unit_price}
+                                            ${item.unit_price}
                                           </TableCell>
                                           <TableCell className="text-right font-medium">
-                                            €{(item.quantity * item.unit_price).toFixed(2)}
+                                            ${(item.quantity * item.unit_price).toFixed(2)}
                                           </TableCell>
                                         </TableRow>
                                       ))}
@@ -258,7 +258,7 @@ const OrderHistory = () => {
                                   {t('orders.total')}:
                                 </span>
                                 <span className="text-xl font-bold">
-                                  €{order.total_amount}
+                                  ${order.total_amount}
                                 </span>
                               </div>
                             </div>
