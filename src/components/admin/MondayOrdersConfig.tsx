@@ -98,7 +98,7 @@ const MondayOrdersConfig: React.FC = () => {
         status: 'En attente',
         numbers: '99.99',
         text8: 'Point de collecte test',
-        long_text: '1x Produit Test (19.99€)',
+        long_text: '1x Produit Test ($19.99)',
         date: new Date().toISOString().split('T')[0],
         email: 'test@example.com'
       });
