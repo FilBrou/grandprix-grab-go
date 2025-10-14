@@ -101,7 +101,7 @@ const Cart: React.FC = () => {
                   variant="outline"
                   size="icon"
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  disabled={isLoading || item.quantity >= item.stock}
+                  disabled={isLoading}
                   className="h-8 w-8"
                 >
                   <Plus className="h-3 w-3" />
@@ -120,9 +120,6 @@ const Cart: React.FC = () => {
               <div className="text-right">
                 <p className="font-semibold">
                   ${(item.price * item.quantity).toFixed(2)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Stock: {item.stock}
                 </p>
               </div>
             </div>

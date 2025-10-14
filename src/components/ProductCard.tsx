@@ -13,7 +13,6 @@ interface Product {
   description: string;
   price: number;
   category: string;
-  stock: number;
   available: boolean;
   image?: string;
   image_url?: string;
@@ -60,16 +59,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
       name: product.name,
       price: product.price,
       category: product.category,
-      stock: product.stock,
       image_url: imageUrl
     }, quantity);
     setQuantity(1); // Reset quantity after adding to cart
   };
 
   const incrementQuantity = () => {
-    if (quantity < product.stock) {
-      setQuantity(prev => prev + 1);
-    }
+    setQuantity(prev => prev + 1);
   };
 
   const decrementQuantity = () => {
@@ -80,7 +76,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
-    if (value >= 1 && value <= product.stock) {
+    if (value >= 1) {
       setQuantity(value);
     }
   };
@@ -101,17 +97,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <p className="text-sm mb-3 line-clamp-2" style={{color: '#000000'}}>
           {product.description}
         </p>
-        
-        <div className="flex items-center justify-end">
-          <span className="text-sm" style={{color: '#000000'}}>
-            Stock: {product.stock}
-          </span>
-        </div>
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex flex-col gap-4">
         {/* Quantity Controls */}
-        {product.available && product.stock > 0 && (
+        {product.available && (
           <div className="w-full">
             <label className="text-sm font-medium mb-2 block" style={{color: '#000000'}}>
               {t('common.quantity')}:
@@ -133,7 +123,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 onChange={handleQuantityChange}
                 className="w-20 text-center h-9 font-medium"
                 min={1}
-                max={product.stock}
                 style={{color: '#000000'}}
               />
               <Button
@@ -141,7 +130,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 size="sm"
                 className="h-9 w-9 border-2"
                 onClick={incrementQuantity}
-                disabled={quantity >= product.stock}
                 style={{borderColor: '#000000'}}
               >
                 <Plus className="h-4 w-4" />
@@ -153,10 +141,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {/* Add to Cart Button */}
         <Button 
           onClick={handleAddToCart} 
-          disabled={!product.available || product.stock === 0 || isLoading}
+          disabled={!product.available || isLoading}
           className="w-full h-12 text-base font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-lg"
           style={{
-            backgroundColor: product.stock === 0 ? '#CCCCCC' : '#FF0000',
+            backgroundColor: !product.available ? '#CCCCCC' : '#FF0000',
             color: '#FFFFFF',
             borderColor: '#FFFFFF',
             padding: '10px'
@@ -166,9 +154,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <span className="truncate">
             {isLoading 
               ? t('common.loading') 
-              : product.available && product.stock > 0 
+              : product.available
                 ? (language === 'fr' ? 'Ajouter' : 'Add to Cart')
-                : t('common.outOfStock')
+                : t('common.unavailable')
             }
           </span>
         </Button>

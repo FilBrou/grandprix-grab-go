@@ -4,7 +4,6 @@ export interface Product {
   description: string;
   price: number;
   category: string;
-  stock: number;
   available: boolean;
   image?: string;
 }
@@ -17,7 +16,6 @@ export const mockProducts: Product[] = [
     description: 'Burger signature avec fromage québécois et bacon fumé',
     price: 18.99,
     category: 'food',
-    stock: 25,
     available: true,
   },
   {
@@ -26,7 +24,6 @@ export const mockProducts: Product[] = [
     description: 'Poutine traditionnelle avec sauce à la viande spéciale GP',
     price: 12.99,
     category: 'food',
-    stock: 30,
     available: true,
   },
   {
@@ -35,7 +32,6 @@ export const mockProducts: Product[] = [
     description: 'Hot-dog artisanal avec oignons caramélisés',
     price: 8.99,
     category: 'food',
-    stock: 0,
     available: false,
   },
 
@@ -46,7 +42,6 @@ export const mockProducts: Product[] = [
     description: 'Boisson énergisante édition spéciale Grand Prix',
     price: 6.99,
     category: 'drinks',
-    stock: 50,
     available: true,
   },
   {
@@ -55,7 +50,6 @@ export const mockProducts: Product[] = [
     description: 'Bière craft brassée localement pour l\'événement',
     price: 9.99,
     category: 'drinks',
-    stock: 20,
     available: true,
   },
   {
@@ -64,7 +58,6 @@ export const mockProducts: Product[] = [
     description: 'Limonade fraîche aux fruits du Québec',
     price: 4.99,
     category: 'drinks',
-    stock: 40,
     available: true,
   },
 
@@ -75,7 +68,6 @@ export const mockProducts: Product[] = [
     description: 'Casquette officielle rouge et noire édition limitée',
     price: 34.99,
     category: 'merchandise',
-    stock: 15,
     available: true,
   },
   {
@@ -84,7 +76,6 @@ export const mockProducts: Product[] = [
     description: 'T-shirt premium 100% coton avec logo brodé',
     price: 29.99,
     category: 'merchandise',
-    stock: 8,
     available: true,
   },
   {
@@ -93,7 +84,6 @@ export const mockProducts: Product[] = [
     description: 'Porte-clés miniature du circuit Gilles-Villeneuve',
     price: 14.99,
     category: 'merchandise',
-    stock: 100,
     available: true,
   },
 ];

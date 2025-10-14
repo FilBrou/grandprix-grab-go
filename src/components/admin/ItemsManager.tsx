@@ -14,7 +14,6 @@ interface Item {
   name: string;
   description: string | null;
   price: number;
-  stock: number;
   category: 'food' | 'drinks' | 'merchandise';
   available: boolean;
   image_url: string | null;
@@ -45,7 +44,6 @@ const ItemsManager = () => {
       name: 'Nom',
       itemDescription: 'Description',
       price: 'Prix',
-      stock: 'Stock',
       category: 'Catégorie',
       status: 'Statut',
       available: 'Disponible',
@@ -70,7 +68,6 @@ const ItemsManager = () => {
       name: 'Name',
       itemDescription: 'Description',
       price: 'Price',
-      stock: 'Stock',
       category: 'Category',
       status: 'Status',
       available: 'Available',
@@ -238,7 +235,6 @@ const ItemsManager = () => {
                     <TableHead>{t.name}</TableHead>
                     <TableHead className="hidden md:table-cell">{t.itemDescription}</TableHead>
                     <TableHead>{t.price}</TableHead>
-                    <TableHead>{t.stock}</TableHead>
                     <TableHead>{t.category}</TableHead>
                     <TableHead>{t.status}</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -268,11 +264,6 @@ const ItemsManager = () => {
                         {item.description}
                       </TableCell>
                       <TableCell>${item.price.toFixed(2)}</TableCell>
-                      <TableCell>
-                        <Badge variant={item.stock > 0 ? 'default' : 'destructive'}>
-                          {item.stock}
-                        </Badge>
-                      </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
                           {categoryTranslations[item.category]}

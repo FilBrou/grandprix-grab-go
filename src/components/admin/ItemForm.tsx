@@ -17,7 +17,6 @@ interface Item {
   name: string;
   description: string | null;
   price: number;
-  stock: number;
   category: 'food' | 'drinks' | 'merchandise';
   available: boolean;
   image_url: string | null;
@@ -35,7 +34,6 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
     name: '',
     description: '',
     price: '',
-    stock: '',
     category: 'food' as 'food' | 'drinks' | 'merchandise',
     available: true,
     image_url: ''
@@ -53,8 +51,6 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
       itemDescription: 'Description',
       price: 'Prix',
       priceRequired: 'Le prix est requis',
-      stock: 'Stock',
-      stockRequired: 'Le stock est requis',
       category: 'Catégorie',
       food: 'Nourriture',
       drinks: 'Boissons',
@@ -78,8 +74,6 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
       itemDescription: 'Description',
       price: 'Price',
       priceRequired: 'Price is required',
-      stock: 'Stock',
-      stockRequired: 'Stock is required',
       category: 'Category',
       food: 'Food',
       drinks: 'Drinks',
@@ -105,7 +99,6 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
         name: item.name,
         description: item.description || '',
         price: item.price.toString(),
-        stock: item.stock.toString(),
         category: item.category,
         available: item.available,
         image_url: item.image_url || ''
@@ -122,7 +115,6 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
         name: formData.name,
         description: formData.description || null,
         price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
         category: formData.category,
         available: formData.available,
         image_url: formData.image_url || null
@@ -222,19 +214,6 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
                 min="0"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                required
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="stock">{t.stock} *</Label>
-              <Input
-                id="stock"
-                type="number"
-                min="0"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                 required
                 disabled={isLoading}
               />

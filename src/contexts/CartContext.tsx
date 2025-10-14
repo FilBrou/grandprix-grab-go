@@ -9,7 +9,6 @@ export interface CartItem {
   price: number;
   quantity: number;
   category: string;
-  stock: number;
   image_url?: string;
 }
 
@@ -49,20 +48,20 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [items]);
 
-  // Check stock availability
-  const checkStock = async (itemId: string, requestedQuantity: number): Promise<boolean> => {
+  // Check availability
+  const checkAvailability = async (itemId: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase
         .from('items')
-        .select('stock, available')
+        .select('available')
         .eq('id', itemId)
         .single();
 
       if (error || !data) return false;
       
-      return data.available && data.stock >= requestedQuantity;
+      return data.available;
     } catch (error) {
-      console.error('Error checking stock:', error);
+      console.error('Error checking availability:', error);
       return false;
     }
   };
@@ -79,18 +78,17 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setIsLoading(true);
     try {
-      const existingItem = items.find(item => item.id === newItem.id);
-      const requestedQuantity = existingItem ? existingItem.quantity + addQuantity : addQuantity;
-
-      const hasStock = await checkStock(newItem.id, requestedQuantity);
-      if (!hasStock) {
+      const isAvailable = await checkAvailability(newItem.id);
+      if (!isAvailable) {
         toast({
-          title: "Stock insuffisant",
-          description: "Cet item n'est plus disponible en quantité suffisante",
+          title: "Produit indisponible",
+          description: "Cet item n'est plus disponible",
           variant: "destructive",
         });
         return;
       }
+
+      const existingItem = items.find(item => item.id === newItem.id);
 
       if (existingItem) {
         setItems(items.map(item => 
@@ -138,13 +136,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setIsLoading(true);
     try {
-      const hasStock = await checkStock(itemId, quantity);
-      if (!hasStock) {
+      const isAvailable = await checkAvailability(itemId);
+      if (!isAvailable) {
         toast({
-          title: "Stock insuffisant",
-          description: "Quantité demandée non disponible",
+          title: "Produit indisponible",
+          description: "Ce produit n'est plus disponible",
           variant: "destructive",
         });
+        removeFromCart(itemId);
         return;
       }
 
@@ -176,12 +175,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  // Real-time stock updates
+  // Real-time availability updates
   useEffect(() => {
     if (items.length === 0) return;
 
     const channel = supabase
-      .channel('stock-updates')
+      .channel('availability-updates')
       .on(
         'postgres_changes',
         {
@@ -194,21 +193,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setItems(currentItems => 
             currentItems.map(item => {
               if (item.id === updatedItem.id) {
-                // If item is no longer available or quantity exceeds stock
-                if (!updatedItem.available || item.quantity > updatedItem.stock) {
+                // If item is no longer available
+                if (!updatedItem.available) {
                   toast({
-                    title: "Stock mis à jour",
-                    description: `${item.name} a été mis à jour dans votre panier`,
+                    title: "Produit indisponible",
+                    description: `${item.name} n'est plus disponible et a été retiré de votre panier`,
                   });
-                  
-                  // Remove if not available or adjust quantity
-                  if (!updatedItem.available) {
-                    return null;
-                  } else {
-                    return { ...item, quantity: Math.min(item.quantity, updatedItem.stock), stock: updatedItem.stock };
-                  }
+                  return null;
                 }
-                return { ...item, stock: updatedItem.stock };
               }
               return item;
             }).filter(Boolean) as CartItem[]
