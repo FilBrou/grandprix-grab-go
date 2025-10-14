@@ -24,6 +24,7 @@ import { EventsManager } from './EventsManager';
 import MondayIntegration from '../MondayIntegration';
 import MondayOrdersConfig from './MondayOrdersConfig';
 import SyncTodayOrders from './SyncTodayOrders';
+import UploadDrinkImages from './UploadDrinkImages';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('events');
@@ -190,6 +191,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
+                    <UploadDrinkImages />
                     <MondayOrdersConfig />
                     <SyncTodayOrders />
                     <div>
