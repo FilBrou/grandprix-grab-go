@@ -30,8 +30,6 @@ const ProductsFromDatabase: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high'>('name');
-  const [priceRange, setPriceRange] = useState<'all' | '0-10' | '10-25' | '25+'>('all');
 
   // Fetch items from database
   const fetchItems = async () => {
@@ -102,7 +100,7 @@ const ProductsFromDatabase: React.FC = () => {
     return counts;
   }, [items]);
 
-  // Filter and sort products
+  // Filter products
   const filteredProducts = useMemo(() => {
     let filtered = items;
 
@@ -119,44 +117,15 @@ const ProductsFromDatabase: React.FC = () => {
       );
     }
 
-    // Filter by price range
-    if (priceRange !== 'all') {
-      filtered = filtered.filter(item => {
-        switch (priceRange) {
-          case '0-10':
-            return item.price <= 10;
-          case '10-25':
-            return item.price > 10 && item.price <= 25;
-          case '25+':
-            return item.price > 25;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Sort products
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        default:
-          return 0;
-      }
-    });
+    // Sort by name
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
 
     return filtered;
-  }, [items, selectedCategory, searchTerm, priceRange, sortBy]);
+  }, [items, selectedCategory, searchTerm]);
 
   const resetFilters = () => {
     setSelectedCategory('all');
     setSearchTerm('');
-    setSortBy('name');
-    setPriceRange('all');
   };
 
   if (isLoading) {
@@ -185,9 +154,9 @@ const ProductsFromDatabase: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Search and Filters */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
+        {/* Search */}
+        <div className="mb-6">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Rechercher des produits..."
@@ -196,29 +165,6 @@ const ProductsFromDatabase: React.FC = () => {
               className="pl-10"
             />
           </div>
-
-          <Select value={sortBy} onValueChange={(value: 'name' | 'price-low' | 'price-high') => setSortBy(value)}>
-            <SelectTrigger className="w-full lg:w-48">
-              <SelectValue placeholder="Trier par" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Nom (A-Z)</SelectItem>
-              <SelectItem value="price-low">Prix croissant</SelectItem>
-              <SelectItem value="price-high">Prix décroissant</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={priceRange} onValueChange={(value: 'all' | '0-10' | '10-25' | '25+') => setPriceRange(value)}>
-            <SelectTrigger className="w-full lg:w-48">
-              <SelectValue placeholder="Gamme de prix" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les prix</SelectItem>
-              <SelectItem value="0-10">0$ - 10$</SelectItem>
-              <SelectItem value="10-25">10$ - 25$</SelectItem>
-              <SelectItem value="25+">25$ et plus</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Category Filter */}
