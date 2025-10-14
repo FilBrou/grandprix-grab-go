@@ -44,6 +44,10 @@ const OrderHistory = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (!user) {
       navigate('/auth');
       return;
