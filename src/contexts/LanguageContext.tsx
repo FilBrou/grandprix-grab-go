@@ -87,6 +87,15 @@ const translations = {
     'orders.subtotal': 'Subtotal',
     'orders.collectionPoint': 'Pickup Location',
     
+    // Quick Order
+    'quickOrder.button': 'Quick Order',
+    'quickOrder.frequentItems': 'Frequent Items',
+    'quickOrder.orderAgain': 'Order Again',
+    
+    // Express Checkout
+    'express.title': 'Express Checkout',
+    'express.standard': 'Standard Checkout',
+    
     // Language names
     'language.en': 'English',
     'language.zh': '中文',
@@ -426,6 +435,15 @@ const translations = {
     'orders.unitPrice': 'Prix',
     'orders.subtotal': 'Sous-total',
     'orders.collectionPoint': 'Lieu de Retrait',
+    
+    // Quick Order
+    'quickOrder.button': 'Commande rapide',
+    'quickOrder.frequentItems': 'Articles fréquents',
+    'quickOrder.orderAgain': 'Commander à nouveau',
+    
+    // Express Checkout
+    'express.title': 'Paiement Express',
+    'express.standard': 'Paiement Standard',
     
     // Language names
     'language.en': 'English',

@@ -132,57 +132,57 @@ const CollectionPointSelector: React.FC<CollectionPointSelectorProps> = ({
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+          <MapPin className="h-4 w-4 md:h-5 md:w-5" />
           {t.title}
         </CardTitle>
-        <CardDescription>{t.subtitle}</CardDescription>
+        <CardDescription className="text-sm">{t.subtitle}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 md:space-y-4">
         {userLocations.map((location) => {
           const isSelected = selectedPointId === location.id;
           
           return (
-            <Card 
-              key={location.id} 
-              className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                isSelected ? 'ring-2 ring-primary bg-primary/5' : 'hover:bg-muted/50'
-              }`}
+            <button
+              key={location.id}
               onClick={() => handleSelectPoint(location.id)}
+              className={`w-full text-left rounded-lg border-2 p-4 min-h-[64px] md:min-h-[56px] transition-all duration-200 ${
+                isSelected
+                  ? 'border-primary bg-primary/5 shadow-sm'
+                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
+              }`}
             >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                      <MapPin className="h-4 w-4" />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm mb-2">{location.location_name}</h4>
-                      
-                      {location.address && (
-                        <p className="text-sm text-muted-foreground">
-                          {location.address}
-                        </p>
-                      )}
-                    </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className={`p-2 md:p-1.5 rounded-lg ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                    <MapPin className="h-5 w-5 md:h-4 md:w-4" />
                   </div>
                   
-                  <div className="ml-3">
-                    {isSelected ? (
-                      <div className="flex items-center gap-2 text-primary">
-                        <Check className="h-4 w-4" />
-                        <span className="text-sm font-medium">{t.selected}</span>
-                      </div>
-                    ) : (
-                      <Button variant="outline" size="sm">
-                        {t.select}
-                      </Button>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-sm md:text-base mb-1">{location.location_name}</h4>
+                    
+                    {location.address && (
+                      <p className="text-xs md:text-sm text-muted-foreground truncate">
+                        {location.address}
+                      </p>
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                
+                <div className="ml-2 flex-shrink-0">
+                  {isSelected ? (
+                    <div className="flex items-center gap-2 text-primary">
+                      <Check className="h-5 w-5 md:h-4 md:w-4" />
+                      <span className="hidden md:inline text-sm font-medium">{t.selected}</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm font-medium text-muted-foreground hidden md:inline">
+                      {t.select}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </button>
           );
         })}
       </CardContent>

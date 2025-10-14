@@ -12,6 +12,10 @@ const Cart: React.FC = () => {
   const { items, totalItems, totalAmount, removeFromCart, updateQuantity, clearCart, isLoading } = useCart();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  
+  const handleExpressCheckout = () => {
+    navigate('/checkout?express=true');
+  };
 
   if (items.length === 0) {
     return (
@@ -34,10 +38,11 @@ const Cart: React.FC = () => {
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      {/* Sticky Header on Mobile */}
+      <CardHeader className="sticky top-0 z-10 bg-background border-b md:static md:border-b-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+            <ShoppingCart className="h-4 w-4 md:h-5 md:w-5" />
             {t('cart.title')}
             <Badge variant="secondary" className="ml-2">
               {totalItems} {totalItems === 1 ? t('cart.item') : t('cart.items')}
@@ -47,10 +52,10 @@ const Cart: React.FC = () => {
             variant="outline" 
             size="sm" 
             onClick={clearCart}
-            className="text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive h-10 min-h-[40px]"
           >
-            <Trash2 className="h-4 w-4 mr-1" />
-            {t('cart.clearAll')}
+            <Trash2 className="h-4 w-4 md:mr-1" />
+            <span className="hidden md:inline">{t('cart.clearAll')}</span>
           </Button>
         </div>
       </CardHeader>
@@ -82,18 +87,19 @@ const Cart: React.FC = () => {
                 </p>
               </div>
               
+              {/* Larger touch targets for mobile */}
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   disabled={isLoading}
-                  className="h-8 w-8"
+                  className="h-10 w-10 min-h-[40px] min-w-[40px] md:h-8 md:w-8"
                 >
-                  <Minus className="h-3 w-3" />
+                  <Minus className="h-4 w-4 md:h-3 md:w-3" />
                 </Button>
                 
-                <span className="w-8 text-center font-semibold">
+                <span className="w-10 text-center font-semibold text-base md:text-sm">
                   {item.quantity}
                 </span>
                 
@@ -102,18 +108,18 @@ const Cart: React.FC = () => {
                   size="icon"
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
                   disabled={isLoading}
-                  className="h-8 w-8"
+                  className="h-10 w-10 min-h-[40px] min-w-[40px] md:h-8 md:w-8"
                 >
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-4 w-4 md:h-3 md:w-3" />
                 </Button>
                 
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => removeFromCart(item.id)}
-                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  className="h-10 w-10 min-h-[40px] min-w-[40px] md:h-8 md:w-8 text-destructive hover:text-destructive"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-4 w-4 md:h-3 md:w-3" />
                 </Button>
               </div>
               
@@ -127,19 +133,42 @@ const Cart: React.FC = () => {
           
           <Separator />
           
-          <div className="flex justify-between items-center text-lg font-semibold">
+          <div className="flex justify-between items-center text-lg md:text-xl font-semibold">
             <span>{t('cart.subtotal')}</span>
             <span className="text-primary">${totalAmount.toFixed(2)}</span>
           </div>
           
-          <Button 
-            onClick={() => navigate('/checkout')}
-            className="w-full mt-4"
-            size="lg"
-          >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            {t('cart.checkout')}
-          </Button>
+          {/* Mobile: Express Checkout Button */}
+          <div className="md:hidden space-y-2">
+            <Button 
+              onClick={handleExpressCheckout}
+              className="w-full h-14 text-base font-semibold"
+              size="lg"
+            >
+              <ShoppingCart className="mr-2 h-5 w-5" />
+              {t('express.title')}
+            </Button>
+            <Button 
+              onClick={() => navigate('/checkout')}
+              variant="outline"
+              className="w-full h-12"
+              size="lg"
+            >
+              {t('express.standard')}
+            </Button>
+          </div>
+          
+          {/* Desktop: Standard Checkout */}
+          <div className="hidden md:block">
+            <Button 
+              onClick={() => navigate('/checkout')}
+              className="w-full mt-4"
+              size="lg"
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              {t('cart.checkout')}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

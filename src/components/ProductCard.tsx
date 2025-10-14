@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { ShoppingCart, Minus, Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
+import { useOrderHistory } from '@/hooks/useOrderHistory';
+import QuickOrderButton from './QuickOrderButton';
 interface Product {
   id: string;
   name: string;
@@ -33,6 +35,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   } = useCart();
   const [imageError, setImageError] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const { frequentItems } = useOrderHistory();
+  
+  const isFrequentItem = frequentItems.some(item => item.id === product.id);
   
   // Générer une couleur basée sur la catégorie
   const getCategoryColor = (category: string) => {
@@ -99,8 +104,23 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </p>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex flex-col gap-4">
-        {/* Quantity Controls */}
+      <CardFooter className="p-4 pt-0 flex flex-col gap-3">
+        {/* Quick Order Badge for frequent items */}
+        {isFrequentItem && product.available && (
+          <div className="w-full">
+            <QuickOrderButton
+              itemId={product.id}
+              itemName={product.name}
+              itemPrice={product.price}
+              itemCategory={product.category}
+              itemImage={imageUrl}
+              defaultQuantity={1}
+              className="w-full"
+            />
+          </div>
+        )}
+
+        {/* Quantity Controls - Improved touch targets */}
         {product.available && (
           <div className="w-full">
             <label className="text-sm font-medium mb-2 block" style={{color: '#000000'}}>
@@ -110,44 +130,44 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 w-9 border-2"
+                className="h-12 w-12 border-2 min-w-[48px] min-h-[48px]"
                 onClick={decrementQuantity}
                 disabled={quantity <= 1}
                 style={{borderColor: '#000000'}}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-5 w-5" />
               </Button>
               <Input
                 type="number"
                 value={quantity}
                 onChange={handleQuantityChange}
-                className="w-20 text-center h-9 font-medium"
+                className="w-20 text-center h-12 font-medium text-lg"
                 min={1}
                 style={{color: '#000000'}}
               />
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 w-9 border-2"
+                className="h-12 w-12 border-2 min-w-[48px] min-h-[48px]"
                 onClick={incrementQuantity}
                 style={{borderColor: '#000000'}}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-5 w-5" />
               </Button>
             </div>
           </div>
         )}
 
-        {/* Add to Cart Button */}
+        {/* Add to Cart Button - Larger touch target */}
         <Button 
           onClick={handleAddToCart} 
           disabled={!product.available || isLoading}
-          className="w-full h-12 text-base font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-lg"
+          className="w-full h-14 min-h-[56px] text-base font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-lg"
           style={{
             backgroundColor: !product.available ? '#CCCCCC' : '#FF0000',
             color: '#FFFFFF',
             borderColor: '#FFFFFF',
-            padding: '10px'
+            padding: '12px'
           }}
         >
           <ShoppingCart className="mr-2 h-5 w-5 shrink-0" />

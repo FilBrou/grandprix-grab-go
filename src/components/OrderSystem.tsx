@@ -22,9 +22,10 @@ interface CartItem {
 interface OrderSystemProps {
   cartItems: CartItem[];
   onOrderSuccess?: () => void;
+  expressMode?: boolean;
 }
 
-const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) => {
+const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess, expressMode = false }) => {
   const [selectedCollectionPoint, setSelectedCollectionPoint] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -33,6 +34,16 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
   const { sendOrderConfirmation } = useNotifications();
   const { toast } = useToast();
   const { createItem } = useMondayIntegration();
+  
+  // Pre-select last location if in express mode
+  useEffect(() => {
+    if (expressMode && user) {
+      const lastLocation = localStorage.getItem(`lastLocationId_${user.id}`);
+      if (lastLocation) {
+        setSelectedCollectionPoint(lastLocation);
+      }
+    }
+  }, [expressMode, user]);
 
   const translations = {
     fr: {
