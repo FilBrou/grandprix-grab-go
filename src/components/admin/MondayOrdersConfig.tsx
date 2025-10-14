@@ -9,6 +9,7 @@ import { AlertCircle, CheckCircle, Settings, TestTube } from 'lucide-react';
 import { useMondayIntegration, MondayBoard } from '@/hooks/useMondayIntegration';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MondayOrderConfig {
   boardId: string;
@@ -56,29 +57,84 @@ const MondayOrdersConfig: React.FC = () => {
     }
   };
 
-  const loadSavedConfig = () => {
-    const savedConfig = localStorage.getItem('monday-orders-config');
-    if (savedConfig) {
-      const parsed = JSON.parse(savedConfig);
-      setConfig(parsed);
-      setSelectedBoard(parsed.boardId);
+  const loadSavedConfig = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('monday_config')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setConfig({
+          boardId: data.board_id,
+          boardName: data.board_name,
+          autoSync: data.auto_sync,
+          statusMapping: data.status_mapping as Record<string, string>
+        });
+        setSelectedBoard(data.board_id);
+      }
+    } catch (err) {
+      console.error('Error loading config:', err);
     }
   };
 
-  const saveConfig = () => {
-    const configToSave = {
-      ...config,
-      boardId: selectedBoard,
-      boardName: boards.find(b => b.id === selectedBoard)?.name || ''
-    };
+  const saveConfig = async () => {
+    const boardName = boards.find(b => b.id === selectedBoard)?.name || '';
     
-    localStorage.setItem('monday-orders-config', JSON.stringify(configToSave));
-    setConfig(configToSave);
-    
-    toast({
-      title: "Configuration sauvegardée",
-      description: "La configuration Monday pour les commandes a été enregistrée",
-    });
+    try {
+      // Check if config already exists
+      const { data: existing } = await supabase
+        .from('monday_config')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+      
+      const configData = {
+        board_id: selectedBoard,
+        board_name: boardName,
+        auto_sync: config.autoSync,
+        status_mapping: config.statusMapping,
+        updated_at: new Date().toISOString()
+      };
+      
+      if (existing) {
+        // Update existing config
+        const { error } = await supabase
+          .from('monday_config')
+          .update(configData)
+          .eq('id', existing.id);
+        
+        if (error) throw error;
+      } else {
+        // Insert new config
+        const { error } = await supabase
+          .from('monday_config')
+          .insert(configData);
+        
+        if (error) throw error;
+      }
+      
+      setConfig({
+        ...config,
+        boardId: selectedBoard,
+        boardName: boardName
+      });
+      
+      toast({
+        title: "Configuration sauvegardée",
+        description: "La configuration Monday a été enregistrée. Les commandes seront synchronisées automatiquement.",
+      });
+    } catch (err) {
+      console.error('Error saving config:', err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder la configuration",
+        variant: "destructive"
+      });
+    }
   };
 
   const testConnection = async () => {

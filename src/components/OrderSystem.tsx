@@ -79,43 +79,11 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
 
   const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+  // Monday sync is now handled automatically by database trigger
+  // This function is kept for backwards compatibility but does nothing
   const createMondayOrderItem = async (order: any, locationId: string) => {
-    try {
-      const config = localStorage.getItem('monday-orders-config');
-      if (!config) return;
-
-      const parsedConfig = JSON.parse(config);
-      if (!parsedConfig.autoSync || !parsedConfig.boardId) return;
-
-      // Get location details
-      const { data: location } = await supabase
-        .from('user_locations')
-        .select('location_name, address')
-        .eq('id', locationId)
-        .single();
-
-      const orderNumber = `Commande #${order.id.slice(-8)}`;
-      const clientInfo = `${user?.email}`;
-      const itemsList = cartItems.map(item => 
-        `${item.quantity}x ${item.name} ($${item.price})`
-      ).join(', ');
-
-      await createItem(parsedConfig.boardId, orderNumber, {
-        text_mkvx37km: clientInfo,
-        color_mkvxwgh5: 'En attente',
-        numeric_mkvxa8vr: totalAmount.toString(),
-        text_mkvx47hv: location ? `${location.location_name} - ${location.address || ''}` : 'Location',
-        long_text_mkvxr408: itemsList,
-        date_mkvxze2g: new Date().toISOString().split('T')[0],
-        email_mkvxnk9v: user?.email,
-        text_mkvxqz78: order.id // ID complet pour référence
-      });
-
-      console.log('Commande synchronisée avec Monday:', orderNumber);
-    } catch (error) {
-      console.error('Erreur synchronisation Monday:', error);
-      // On ne fait pas échouer la commande si Monday échoue
-    }
+    // Automatic sync is handled by the database trigger on order insert
+    console.log('Order will be synced to Monday.com automatically via database trigger');
   };
 
   const handlePlaceOrder = async () => {

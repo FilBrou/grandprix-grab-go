@@ -53,6 +53,36 @@ export type Database = {
         }
         Relationships: []
       }
+      monday_config: {
+        Row: {
+          auto_sync: boolean
+          board_id: string
+          board_name: string
+          created_at: string
+          id: string
+          status_mapping: Json
+          updated_at: string
+        }
+        Insert: {
+          auto_sync?: boolean
+          board_id: string
+          board_name: string
+          created_at?: string
+          id?: string
+          status_mapping?: Json
+          updated_at?: string
+        }
+        Update: {
+          auto_sync?: boolean
+          board_id?: string
+          board_name?: string
+          created_at?: string
+          id?: string
+          status_mapping?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
