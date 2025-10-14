@@ -85,13 +85,27 @@ const ProductCard: React.FC<ProductCardProps> = ({
       setQuantity(value);
     }
   };
-  return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1" style={{backgroundColor: '#F5F5F5'}}>
-        {/* Removed AspectRatio image section - using plain background instead */}
-        <div className="h-32 flex items-center justify-center" style={{backgroundColor: '#F5F5F5'}}>
-          <div className="text-4xl mb-2">🍷</div>
-        </div>
+  return <Card className="group overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
+        <AspectRatio ratio={16 / 9}>
+          <div className={`w-full h-full ${getCategoryColor(product.category)} flex items-center justify-center overflow-hidden`}>
+            {!imageError ? (
+              <img
+                src={imageUrl}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                onError={() => setImageError(true)}
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-4xl mb-2">🍷</div>
+                <span className="text-xs text-muted-foreground">{product.name}</span>
+              </div>
+            )}
+          </div>
+        </AspectRatio>
 
-        <CardContent className="p-4" style={{color: '#000000'}}>
+        <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-semibold text-lg leading-tight" style={{color: '#000000'}}>{product.name}</h3>
           <Badge variant="outline" className="ml-2 shrink-0" style={{color: '#000000'}}>
