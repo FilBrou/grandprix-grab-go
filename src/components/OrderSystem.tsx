@@ -19,16 +19,6 @@ interface CartItem {
   category: string;
 }
 
-interface CollectionPoint {
-  id: string;
-  name: string;
-  location: string;
-  latitude: number | null;
-  longitude: number | null;
-  type: 'entrepot' | 'sous_entrepot' | 'point_de_livraison';
-  created_at: string;
-}
-
 interface OrderSystemProps {
   cartItems: CartItem[];
   onOrderSuccess?: () => void;
@@ -36,8 +26,6 @@ interface OrderSystemProps {
 
 const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) => {
   const [selectedCollectionPoint, setSelectedCollectionPoint] = useState<string>('');
-  const [collectionPoints, setCollectionPoints] = useState<CollectionPoint[]>([]);
-  const [isLoadingPoints, setIsLoadingPoints] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   
   const { language } = useLanguage();
@@ -49,10 +37,10 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
   const translations = {
     fr: {
       title: 'Finaliser la Commande',
-      description: 'Choisissez votre point de collecte et confirmez votre commande',
+      description: 'Choisissez votre emplacement et confirmez votre commande',
       cartSummary: 'Résumé de la commande',
-      collectionPoint: 'Point de collecte',
-      selectCollectionPoint: 'Sélectionnez un point de collecte',
+      collectionPoint: 'Emplacement de livraison',
+      selectCollectionPoint: 'Sélectionnez un emplacement',
       total: 'Total',
       placeOrder: 'Valider la commande',
       processing: 'Traitement...',
@@ -60,18 +48,18 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       orderSuccessDesc: 'Votre commande a été créée avec succès. Vous allez recevoir un email de confirmation.',
       loginRequired: 'Connexion requise',
       loginRequiredDesc: 'Vous devez être connecté pour passer une commande.',
-      selectPointRequired: 'Point de collecte requis',
-      selectPointRequiredDesc: 'Veuillez sélectionner un point de collecte.',
+      selectPointRequired: 'Emplacement requis',
+      selectPointRequiredDesc: 'Veuillez sélectionner un emplacement de livraison.',
       emptyCart: 'Panier vide',
       emptyCartDesc: 'Ajoutez des articles à votre panier avant de finaliser.',
       orderError: 'Erreur lors de la commande'
     },
     en: {
       title: 'Complete Order',
-      description: 'Choose your collection point and confirm your order',
+      description: 'Choose your location and confirm your order',
       cartSummary: 'Order summary',
-      collectionPoint: 'Collection point',
-      selectCollectionPoint: 'Select a collection point',
+      collectionPoint: 'Delivery location',
+      selectCollectionPoint: 'Select a location',
       total: 'Total',
       placeOrder: 'Validate order',
       processing: 'Processing...',
@@ -79,8 +67,8 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       orderSuccessDesc: 'Your order has been created successfully. You will receive a confirmation email.',
       loginRequired: 'Login required',
       loginRequiredDesc: 'You must be logged in to place an order.',
-      selectPointRequired: 'Collection point required',
-      selectPointRequiredDesc: 'Please select a collection point.',
+      selectPointRequired: 'Location required',
+      selectPointRequiredDesc: 'Please select a delivery location.',
       emptyCart: 'Empty cart',
       emptyCartDesc: 'Add items to your cart before checking out.',
       orderError: 'Order error'
@@ -91,44 +79,20 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
 
   const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  useEffect(() => {
-    fetchCollectionPoints();
-  }, []);
-
-  const fetchCollectionPoints = async () => {
-    try {
-      setIsLoadingPoints(true);
-      const { data, error } = await supabase
-        .from('collection_points')
-        .select('*')
-        .order('type', { ascending: true })
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-
-      setCollectionPoints((data || []).map(point => ({
-        ...point,
-        type: point.type as 'entrepot' | 'sous_entrepot' | 'point_de_livraison'
-      })));
-    } catch (error) {
-      console.error('Error fetching collection points:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger les points de collecte',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoadingPoints(false);
-    }
-  };
-
-  const createMondayOrderItem = async (order: any, collectionPoint: CollectionPoint) => {
+  const createMondayOrderItem = async (order: any, locationId: string) => {
     try {
       const config = localStorage.getItem('monday-orders-config');
       if (!config) return;
 
       const parsedConfig = JSON.parse(config);
       if (!parsedConfig.autoSync || !parsedConfig.boardId) return;
+
+      // Get location details
+      const { data: location } = await supabase
+        .from('user_locations')
+        .select('location_name, address')
+        .eq('id', locationId)
+        .single();
 
       const orderNumber = `Commande #${order.id.slice(-8)}`;
       const clientInfo = `${user?.email}`;
@@ -140,7 +104,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
         text_mkvx37km: clientInfo,
         color_mkvxwgh5: 'En attente',
         numeric_mkvxa8vr: totalAmount.toString(),
-        text_mkvx47hv: `${collectionPoint.name} - ${collectionPoint.location}`,
+        text_mkvx47hv: location ? `${location.location_name} - ${location.address || ''}` : 'Location',
         long_text_mkvxr408: itemsList,
         date_mkvxze2g: new Date().toISOString().split('T')[0],
         email_mkvxnk9v: user?.email,
@@ -195,7 +159,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
         .insert({
           user_id: user.id,
           total_amount: totalAmount,
-          collection_point_id: selectedCollectionPoint,
+          user_location_id: selectedCollectionPoint,
           status: 'pending'
         })
         .select()
@@ -246,8 +210,12 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
 
       console.log('Stock updated successfully');
 
-      // Get collection point details
-      const selectedPoint = collectionPoints.find(p => p.id === selectedCollectionPoint);
+      // Get location details
+      const { data: selectedLocation } = await supabase
+        .from('user_locations')
+        .select('location_name, address')
+        .eq('id', selectedCollectionPoint)
+        .single();
       
       // Prepare order confirmation data
       const orderConfirmationData = {
@@ -261,7 +229,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
           unit_price: item.price
         })),
         totalAmount,
-        collectionPoint: selectedPoint ? `${selectedPoint.name} - ${selectedPoint.location}` : 'Point de collecte',
+        collectionPoint: selectedLocation ? `${selectedLocation.location_name} - ${selectedLocation.address || ''}` : 'Location',
         language
       };
 
@@ -270,9 +238,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess }) 
       await sendOrderConfirmation(orderConfirmationData);
 
       // Synchronize with Monday.com (async, non-blocking)
-      if (selectedPoint) {
-        createMondayOrderItem(orderData, selectedPoint);
-      }
+      createMondayOrderItem(orderData, selectedCollectionPoint);
 
       console.log('Order process completed successfully for order:', orderData.id);
       toast({

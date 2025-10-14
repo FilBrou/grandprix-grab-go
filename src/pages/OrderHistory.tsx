@@ -19,7 +19,7 @@ interface Order {
   id: string;
   created_at: string;
   total_amount: number;
-  collection_point_id: string | null;
+  user_location_id: string | null;
   order_items: Array<{
     quantity: number;
     unit_price: number;
@@ -28,9 +28,9 @@ interface Order {
       image_url: string | null;
     };
   }>;
-  collection_points: {
-    name: string;
-    location: string;
+  user_locations: {
+    location_name: string;
+    address: string | null;
   } | null;
 }
 
@@ -61,7 +61,7 @@ const OrderHistory = () => {
             id,
             created_at,
             total_amount,
-            collection_point_id,
+            user_location_id,
             order_items (
               quantity,
               unit_price,
@@ -70,9 +70,9 @@ const OrderHistory = () => {
                 image_url
               )
             ),
-            collection_points (
-              name,
-              location
+            user_locations (
+              location_name,
+              address
             )
           `)
           .eq('user_id', user.id)
@@ -201,17 +201,19 @@ const OrderHistory = () => {
                                     {format(new Date(order.created_at), 'dd/MM/yyyy HH:mm')}
                                   </p>
                                 </div>
-                                {order.collection_points && (
+                                {order.user_locations && (
                                   <div>
                                     <label className="text-sm font-medium text-muted-foreground">
                                       {t('orders.collectionPoint')}
                                     </label>
                                     <div className="flex items-center gap-2 mt-1">
                                       <MapPin className="h-4 w-4" />
-                                      <span>{order.collection_points.name}</span>
-                                      <span className="text-muted-foreground">
-                                        - {order.collection_points.location}
-                                      </span>
+                                      <span>{order.user_locations.location_name}</span>
+                                      {order.user_locations.address && (
+                                        <span className="text-muted-foreground">
+                                          - {order.user_locations.address}
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
                                 )}

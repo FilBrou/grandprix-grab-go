@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Warehouse, Building, Truck, Check } from 'lucide-react';
+import { MapPin, Check } from 'lucide-react';
 
-interface CollectionPoint {
+interface UserLocation {
   id: string;
-  name: string;
-  location: string;
-  latitude: number | null;
-  longitude: number | null;
-  type: 'entrepot' | 'sous_entrepot' | 'point_de_livraison';
+  location_name: string;
+  address: string | null;
   created_at: string;
 }
 
@@ -28,78 +25,61 @@ const CollectionPointSelector: React.FC<CollectionPointSelectorProps> = ({
   onSelectPoint,
   className = "" 
 }) => {
-  const [collectionPoints, setCollectionPoints] = useState<CollectionPoint[]>([]);
+  const [userLocations, setUserLocations] = useState<UserLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { language } = useLanguage();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const translations = {
     fr: {
-      title: 'Points de Collecte',
-      subtitle: 'Sélectionnez votre point de collecte préféré',
-      loading: 'Chargement des points de collecte...',
+      title: 'Mes Emplacements',
+      subtitle: 'Sélectionnez l\'emplacement de livraison',
+      loading: 'Chargement de vos emplacements...',
       error: 'Erreur lors du chargement',
-      noPoints: 'Aucun point de collecte disponible',
+      noPoints: 'Aucun emplacement disponible',
       select: 'Sélectionner',
-      selected: 'Sélectionné',
-      entrepot: 'Entrepôt',
-      sous_entrepot: 'Sous-entrepôt',
-      point_de_livraison: 'Point de livraison',
-      coordinates: 'Coordonnées'
+      selected: 'Sélectionné'
     },
     en: {
-      title: 'Collection Points',
-      subtitle: 'Select your preferred collection point',
-      loading: 'Loading collection points...',
-      error: 'Error loading points',
-      noPoints: 'No collection points available',
+      title: 'My Locations',
+      subtitle: 'Select delivery location',
+      loading: 'Loading your locations...',
+      error: 'Error loading locations',
+      noPoints: 'No locations available',
       select: 'Select',
-      selected: 'Selected',
-      entrepot: 'Warehouse',
-      sous_entrepot: 'Sub-warehouse',
-      point_de_livraison: 'Delivery point',
-      coordinates: 'Coordinates'
+      selected: 'Selected'
     }
   };
 
   const t = translations[language];
 
-  const typeIcons = {
-    entrepot: Warehouse,
-    sous_entrepot: Building,
-    point_de_livraison: Truck
-  };
-
-  const typeColors = {
-    entrepot: 'default' as const,
-    sous_entrepot: 'secondary' as const,
-    point_de_livraison: 'outline' as const
-  };
-
   useEffect(() => {
-    fetchCollectionPoints();
-  }, []);
+    fetchUserLocations();
+  }, [user]);
 
-  const fetchCollectionPoints = async () => {
+  const fetchUserLocations = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('collection_points')
+        .from('user_locations')
         .select('*')
-        .order('type', { ascending: true })
-        .order('name', { ascending: true });
+        .eq('user_id', user.id)
+        .order('location_name', { ascending: true });
 
       if (error) throw error;
 
-      setCollectionPoints((data || []).map(point => ({
-        ...point,
-        type: point.type as 'entrepot' | 'sous_entrepot' | 'point_de_livraison'
-      })));
+      setUserLocations(data || []);
     } catch (error) {
-      console.error('Error fetching collection points:', error);
+      console.error('Error fetching user locations:', error);
       toast({
         title: t.error,
-        description: 'Failed to load collection points',
+        description: 'Failed to load locations',
         variant: 'destructive',
       });
     } finally {
@@ -130,7 +110,7 @@ const CollectionPointSelector: React.FC<CollectionPointSelectorProps> = ({
     );
   }
 
-  if (collectionPoints.length === 0) {
+  if (userLocations.length === 0) {
     return (
       <Card className={className}>
         <CardHeader>
@@ -159,40 +139,30 @@ const CollectionPointSelector: React.FC<CollectionPointSelectorProps> = ({
         <CardDescription>{t.subtitle}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {collectionPoints.map((point) => {
-          const IconComponent = typeIcons[point.type];
-          const isSelected = selectedPointId === point.id;
+        {userLocations.map((location) => {
+          const isSelected = selectedPointId === location.id;
           
           return (
             <Card 
-              key={point.id} 
+              key={location.id} 
               className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                 isSelected ? 'ring-2 ring-primary bg-primary/5' : 'hover:bg-muted/50'
               }`}
-              onClick={() => handleSelectPoint(point.id)}
+              onClick={() => handleSelectPoint(location.id)}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
                     <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                      <IconComponent className="h-4 w-4" />
+                      <MapPin className="h-4 w-4" />
                     </div>
                     
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold text-sm">{point.name}</h4>
-                        <Badge variant={typeColors[point.type]} className="text-xs">
-                          {t[point.type]}
-                        </Badge>
-                      </div>
+                      <h4 className="font-semibold text-sm mb-2">{location.location_name}</h4>
                       
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {point.location}
-                      </p>
-                      
-                      {point.latitude && point.longitude && (
-                        <p className="text-xs text-muted-foreground">
-                          {t.coordinates}: {point.latitude.toFixed(4)}, {point.longitude.toFixed(4)}
+                      {location.address && (
+                        <p className="text-sm text-muted-foreground">
+                          {location.address}
                         </p>
                       )}
                     </div>

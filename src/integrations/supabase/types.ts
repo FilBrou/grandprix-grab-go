@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      collection_points: {
-        Row: {
-          created_at: string
-          id: string
-          latitude: number | null
-          location: string
-          longitude: number | null
-          name: string
-          type: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          latitude?: number | null
-          location: string
-          longitude?: number | null
-          name: string
-          type?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          latitude?: number | null
-          location?: string
-          longitude?: number | null
-          name?: string
-          type?: string
-        }
-        Relationships: []
-      }
       items: {
         Row: {
           available: boolean
@@ -171,7 +141,6 @@ export type Database = {
       }
       orders: {
         Row: {
-          collection_point_id: string | null
           created_at: string
           delivery_location: string | null
           id: string
@@ -179,9 +148,9 @@ export type Database = {
           total_amount: number
           updated_at: string
           user_id: string
+          user_location_id: string | null
         }
         Insert: {
-          collection_point_id?: string | null
           created_at?: string
           delivery_location?: string | null
           id?: string
@@ -189,9 +158,9 @@ export type Database = {
           total_amount: number
           updated_at?: string
           user_id: string
+          user_location_id?: string | null
         }
         Update: {
-          collection_point_id?: string | null
           created_at?: string
           delivery_location?: string | null
           id?: string
@@ -199,13 +168,14 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           user_id?: string
+          user_location_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "orders_collection_point_id_fkey"
-            columns: ["collection_point_id"]
+            foreignKeyName: "orders_user_location_id_fkey"
+            columns: ["user_location_id"]
             isOneToOne: false
-            referencedRelation: "collection_points"
+            referencedRelation: "user_locations"
             referencedColumns: ["id"]
           },
         ]

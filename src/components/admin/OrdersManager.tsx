@@ -15,16 +15,16 @@ interface Order {
   user_id: string;
   status: 'pending' | 'confirmed' | 'ready' | 'completed' | 'cancelled';
   total_amount: number;
-  collection_point_id: string | null;
+  user_location_id: string | null;
   created_at: string;
   updated_at: string;
   profiles: {
     name: string | null;
     email: string;
   } | null;
-  collection_points: {
-    name: string;
-    location: string;
+  user_locations: {
+    location_name: string;
+    address: string | null;
   } | null;
   order_items: {
     quantity: number;
@@ -132,7 +132,7 @@ const OrdersManager = () => {
         .from('orders')
         .select(`
           *,
-          collection_points (name, location),
+          user_locations (location_name, address),
           order_items (
             quantity,
             unit_price,
@@ -430,7 +430,7 @@ const OrdersManager = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
-                          {order.collection_points?.name || t.unknown}
+                          {order.user_locations?.location_name || t.unknown}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell">
                           {formatDate(order.created_at)}
