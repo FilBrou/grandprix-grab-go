@@ -173,6 +173,7 @@ export type Database = {
         Row: {
           collection_point_id: string | null
           created_at: string
+          delivery_location: string | null
           id: string
           status: string
           total_amount: number
@@ -182,6 +183,7 @@ export type Database = {
         Insert: {
           collection_point_id?: string | null
           created_at?: string
+          delivery_location?: string | null
           id?: string
           status?: string
           total_amount: number
@@ -191,6 +193,7 @@ export type Database = {
         Update: {
           collection_point_id?: string | null
           created_at?: string
+          delivery_location?: string | null
           id?: string
           status?: string
           total_amount?: number
@@ -212,7 +215,9 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          location: string | null
           name: string | null
+          phone: string | null
           role: string
           updated_at: string
           user_id: string
@@ -221,7 +226,9 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          location?: string | null
           name?: string | null
+          phone?: string | null
           role?: string
           updated_at?: string
           user_id: string
@@ -230,7 +237,9 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          location?: string | null
           name?: string | null
+          phone?: string | null
           role?: string
           updated_at?: string
           user_id?: string

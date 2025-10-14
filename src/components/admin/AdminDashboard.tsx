@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import ItemsManager from './ItemsManager';
 import OrdersManager from './OrdersManager';
 import ReportsManager from './ReportsManager';
+import UsersManager from './UsersManager';
 import MondayIntegration from '../MondayIntegration';
 import MondayOrdersConfig from './MondayOrdersConfig';
 import SyncTodayOrders from './SyncTodayOrders';
@@ -34,6 +35,7 @@ const AdminDashboard = () => {
       subtitle: 'Gérez votre plateforme de commande Grand Prix Montréal',
       items: 'Articles',
       orders: 'Commandes',
+      users: 'Utilisateurs',
       reports: 'Rapports',
       settings: 'Paramètres',
       integrations: 'Intégrations',
@@ -49,6 +51,7 @@ const AdminDashboard = () => {
       subtitle: 'Manage your Montreal Grand Prix ordering platform',
       items: 'Items',
       orders: 'Orders',
+      users: 'Users',
       reports: 'Reports',
       settings: 'Settings',
       integrations: 'Integrations',
@@ -122,7 +125,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
             <TabsTrigger value="items" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               <span className="hidden sm:inline">{t.items}</span>
@@ -130,6 +133,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
               <span className="hidden sm:inline">{t.orders}</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.users}</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -148,6 +155,10 @@ const AdminDashboard = () => {
 
             <TabsContent value="orders" className="space-y-6">
               <OrdersManager />
+            </TabsContent>
+
+            <TabsContent value="users" className="space-y-6">
+              <UsersManager />
             </TabsContent>
 
             <TabsContent value="reports" className="space-y-6">
