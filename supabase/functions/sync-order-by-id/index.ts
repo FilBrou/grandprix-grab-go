@@ -20,12 +20,9 @@ interface Order {
   user_id: string;
   status: string;
   total_amount: number;
-  collection_point_id: string | null;
+  user_location_id: string | null;
+  delivery_location: string | null;
   created_at: string;
-  collection_points?: {
-    name: string;
-    location: string;
-  } | null;
   order_items: {
     quantity: number;
     unit_price: number;
@@ -33,6 +30,12 @@ interface Order {
       name: string;
     };
   }[];
+}
+
+interface UserLocation {
+  id: string;
+  location_name: string;
+  address: string | null;
 }
 
 async function makeMondayRequest(query: string, variables?: any) {
@@ -128,7 +131,6 @@ serve(async (req) => {
       .from('orders')
       .select(`
         *,
-        collection_points (name, location),
         order_items (
           quantity,
           unit_price,
@@ -146,6 +148,24 @@ serve(async (req) => {
     }
 
     const order = orders[0] as Order;
+
+    // Fetch user location if available
+    let userLocation: UserLocation | null = null;
+    if (order.user_location_id) {
+      console.log(`Fetching user location ${order.user_location_id}...`);
+      const { data: locationData, error: locationError } = await supabase
+        .from('user_locations')
+        .select('id, location_name, address')
+        .eq('id', order.user_location_id)
+        .single();
+      
+      if (!locationError && locationData) {
+        userLocation = locationData;
+        console.log(`User location found: ${userLocation.location_name}`);
+      } else {
+        console.warn(`User location not found for ID ${order.user_location_id}:`, locationError);
+      }
+    }
 
     // Fetch user profile
     const { data: profile } = await supabase
@@ -209,9 +229,12 @@ serve(async (req) => {
       columnValues[amountCol.id] = parseFloat(order.total_amount.toString());
     }
 
-    if (columnMap.has('collection') && order.collection_points) {
+    if (columnMap.has('collection')) {
       const collectionCol = columnMap.get('collection');
-      columnValues[collectionCol.id] = `${order.collection_points.name} - ${order.collection_points.location}`;
+      const collectionPointText = userLocation
+        ? `${userLocation.location_name}${userLocation.address ? ' - ' + userLocation.address : ''}`
+        : order.delivery_location || 'Non spécifié';
+      columnValues[collectionCol.id] = collectionPointText;
     }
 
     if (columnMap.has('items')) {
