@@ -246,6 +246,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_locations: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          location_name: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          location_name: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          location_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

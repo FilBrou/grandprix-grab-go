@@ -9,15 +9,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Users, Mail, MapPin, Phone } from 'lucide-react';
 import UserForm from './UserForm';
 
+interface UserLocation {
+  location_name: string;
+  address: string | null;
+}
+
 interface User {
   id: string;
   user_id: string;
   email: string;
   name: string | null;
   role: string;
-  location: string | null;
   phone: string | null;
   created_at: string;
+  locations?: UserLocation[];
 }
 
 const UsersManager = () => {
@@ -82,7 +87,23 @@ const UsersManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+
+      // Fetch locations for each user
+      const usersWithLocations = await Promise.all(
+        (data || []).map(async (user) => {
+          const { data: locations } = await supabase
+            .from('user_locations')
+            .select('location_name, address')
+            .eq('user_id', user.user_id);
+
+          return {
+            ...user,
+            locations: locations || []
+          };
+        })
+      );
+
+      setUsers(usersWithLocations);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -181,10 +202,19 @@ const UsersManager = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {user.location ? (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-muted-foreground" />
-                            {user.location}
+                        {user.locations && user.locations.length > 0 ? (
+                          <div className="space-y-1">
+                            {user.locations.map((loc, idx) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div className="text-sm">
+                                  <div className="font-medium">{loc.location_name}</div>
+                                  {loc.address && (
+                                    <div className="text-muted-foreground text-xs">{loc.address}</div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         ) : (
                           '-'

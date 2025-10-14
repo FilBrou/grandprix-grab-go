@@ -7,7 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, Plus, Trash2 } from 'lucide-react';
+
+interface UserLocation {
+  location_name: string;
+  address: string | null;
+}
 
 interface User {
   id: string;
@@ -15,8 +20,8 @@ interface User {
   email: string;
   name: string | null;
   role: string;
-  location: string | null;
   phone: string | null;
+  locations?: UserLocation[];
 }
 
 interface UserFormProps {
@@ -26,12 +31,14 @@ interface UserFormProps {
 
 const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [locations, setLocations] = useState<Array<{ location_name: string; address: string }>>([
+    { location_name: '', address: '' }
+  ]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     role: 'user',
-    location: '',
     phone: ''
   });
 
@@ -46,7 +53,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
       email: 'Email',
       password: 'Mot de passe',
       passwordHint: 'Laissez vide pour ne pas changer',
-      location: 'Emplacement',
+      locations: 'Emplacements',
+      locationName: 'Nom de l\'emplacement',
+      address: 'Adresse',
+      addLocation: 'Ajouter un emplacement',
       phone: 'Téléphone',
       role: 'Rôle',
       admin: 'Administrateur',
@@ -67,7 +77,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
       email: 'Email',
       password: 'Password',
       passwordHint: 'Leave empty to keep unchanged',
-      location: 'Location',
+      locations: 'Locations',
+      locationName: 'Location Name',
+      address: 'Address',
+      addLocation: 'Add Location',
       phone: 'Phone',
       role: 'Role',
       admin: 'Admin',
@@ -86,17 +99,44 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
   const t = translations[language];
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        email: user.email,
-        password: '',
-        role: user.role,
-        location: user.location || '',
-        phone: user.phone || ''
-      });
-    }
+    const fetchUserLocations = async () => {
+      if (user) {
+        setFormData({
+          name: user.name || '',
+          email: user.email,
+          password: '',
+          role: user.role,
+          phone: user.phone || ''
+        });
+
+        // Fetch user locations
+        const { data: userLocations, error } = await supabase
+          .from('user_locations')
+          .select('location_name, address')
+          .eq('user_id', user.user_id);
+
+        if (!error && userLocations && userLocations.length > 0) {
+          setLocations(userLocations);
+        }
+      }
+    };
+
+    fetchUserLocations();
   }, [user]);
+
+  const addLocation = () => {
+    setLocations([...locations, { location_name: '', address: '' }]);
+  };
+
+  const removeLocation = (index: number) => {
+    setLocations(locations.filter((_, i) => i !== index));
+  };
+
+  const updateLocation = (index: number, field: 'location_name' | 'address', value: string) => {
+    const newLocations = [...locations];
+    newLocations[index][field] = value;
+    setLocations(newLocations);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,12 +150,33 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
           .update({
             name: formData.name || null,
             role: formData.role,
-            location: formData.location || null,
             phone: formData.phone || null
           })
           .eq('user_id', user.user_id);
 
         if (profileError) throw profileError;
+
+        // Delete existing locations
+        await supabase
+          .from('user_locations')
+          .delete()
+          .eq('user_id', user.user_id);
+
+        // Insert new locations
+        const validLocations = locations.filter(loc => loc.location_name.trim() !== '');
+        if (validLocations.length > 0) {
+          const { error: locationsError } = await supabase
+            .from('user_locations')
+            .insert(
+              validLocations.map(loc => ({
+                user_id: user.user_id,
+                location_name: loc.location_name,
+                address: loc.address || null
+              }))
+            );
+
+          if (locationsError) throw locationsError;
+        }
 
         // Update password if provided
         if (formData.password) {
@@ -150,11 +211,26 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
             email: formData.email,
             name: formData.name || null,
             role: formData.role,
-            location: formData.location || null,
             phone: formData.phone || null
           }]);
 
         if (profileError) throw profileError;
+
+        // Insert locations
+        const validLocations = locations.filter(loc => loc.location_name.trim() !== '');
+        if (validLocations.length > 0) {
+          const { error: locationsError } = await supabase
+            .from('user_locations')
+            .insert(
+              validLocations.map(loc => ({
+                user_id: authData.user.id,
+                location_name: loc.location_name,
+                address: loc.address || null
+              }))
+            );
+
+          if (locationsError) throw locationsError;
+        }
 
         toast({
           title: t.userSaved,
@@ -243,27 +319,74 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="location">{t.location}</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>{t.locations}</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addLocation}
                 disabled={isLoading}
-              />
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {t.addLocation}
+              </Button>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">{t.phone}</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                disabled={isLoading}
-              />
-            </div>
+            {locations.map((location, index) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
+                <div className="space-y-2">
+                  <Label htmlFor={`location-name-${index}`}>{t.locationName}</Label>
+                  <Input
+                    id={`location-name-${index}`}
+                    value={location.location_name}
+                    onChange={(e) => updateLocation(index, 'location_name', e.target.value)}
+                    disabled={isLoading}
+                    placeholder="e.g., Main Office, Warehouse A"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor={`address-${index}`}>{t.address}</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id={`address-${index}`}
+                      value={location.address}
+                      onChange={(e) => updateLocation(index, 'address', e.target.value)}
+                      disabled={isLoading}
+                      placeholder="Full address"
+                      className="flex-1"
+                    />
+                    {locations.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeLocation(index)}
+                        disabled={isLoading}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">{t.phone}</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              disabled={isLoading}
+            />
           </div>
 
           <div className="flex justify-end space-x-4 pt-6">
