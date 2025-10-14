@@ -40,18 +40,6 @@ const Header = () => {
           }}>
             {t('nav.home')}
           </Button>
-          <Button variant="ghost" className="text-sm font-medium" onClick={() => {
-            if (window.location.pathname === '/') {
-              window.scrollTo({
-                top: window.innerHeight,
-                behavior: 'smooth'
-              });
-            } else {
-              navigate('/#catalog');
-            }
-          }}>
-            {t('nav.catalog')}
-          </Button>
           {user && (
             <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate('/orders')}>
               {t('nav.orders')}
