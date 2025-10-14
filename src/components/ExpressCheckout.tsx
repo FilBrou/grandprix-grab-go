@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useLastLocation } from '@/hooks/useLastLocation';
+import { useEvent } from '@/contexts/EventContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +28,7 @@ const ExpressCheckout: React.FC = () => {
   const { items, totalAmount, clearCart } = useCart();
   const { user, profile } = useAuth();
   const { lastLocationId, saveLastLocation } = useLastLocation();
+  const { currentEvent } = useEvent();
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -97,6 +99,7 @@ const ExpressCheckout: React.FC = () => {
         .from('orders')
         .insert({
           user_id: user.id,
+          event_id: currentEvent!.id,
           total_amount: totalAmount,
           user_location_id: selectedLocation,
           status: 'pending',

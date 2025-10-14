@@ -12,6 +12,7 @@ import { Zap, Check, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLastLocation } from '@/hooks/useLastLocation';
+import { useEvent } from '@/contexts/EventContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +42,7 @@ const QuickOrderButton: React.FC<QuickOrderButtonProps> = ({
   
   const { t, language } = useLanguage();
   const { user, profile } = useAuth();
+  const { currentEvent } = useEvent();
   const { lastLocationId } = useLastLocation();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -127,6 +129,7 @@ const QuickOrderButton: React.FC<QuickOrderButtonProps> = ({
         .from('orders')
         .insert({
           user_id: user.id,
+          event_id: currentEvent!.id,
           total_amount: totalAmount,
           user_location_id: lastLocationId,
           status: 'pending',

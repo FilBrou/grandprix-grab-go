@@ -10,7 +10,8 @@ import {
   ShoppingCart, 
   Users, 
   BarChart3, 
-  Settings, 
+  Settings,
+  Calendar,
   Home,
   LogOut
 } from 'lucide-react';
@@ -19,12 +20,13 @@ import ItemsManager from './ItemsManager';
 import OrdersManager from './OrdersManager';
 import ReportsManager from './ReportsManager';
 import UsersManager from './UsersManager';
+import { EventsManager } from './EventsManager';
 import MondayIntegration from '../MondayIntegration';
 import MondayOrdersConfig from './MondayOrdersConfig';
 import SyncTodayOrders from './SyncTodayOrders';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('items');
+  const [activeTab, setActiveTab] = useState('events');
   const { language } = useLanguage();
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
@@ -32,7 +34,8 @@ const AdminDashboard = () => {
   const translations = {
     fr: {
       title: 'Tableau de Bord Administrateur',
-      subtitle: 'Gérez votre plateforme de commande Grand Prix Montréal',
+      subtitle: 'Gérez votre plateforme de commande d\'événements',
+      events: 'Événements',
       items: 'Articles',
       orders: 'Commandes',
       users: 'Utilisateurs',
@@ -48,7 +51,8 @@ const AdminDashboard = () => {
     },
     en: {
       title: 'Admin Dashboard',
-      subtitle: 'Manage your Montreal Grand Prix ordering platform',
+      subtitle: 'Manage your event ordering platform',
+      events: 'Events',
       items: 'Items',
       orders: 'Orders',
       users: 'Users',
@@ -125,7 +129,11 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6">
+            <TabsTrigger value="events" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.events}</span>
+            </TabsTrigger>
             <TabsTrigger value="items" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               <span className="hidden sm:inline">{t.items}</span>
@@ -149,6 +157,10 @@ const AdminDashboard = () => {
           </TabsList>
 
           <div className="mt-8">
+            <TabsContent value="events" className="space-y-6">
+              <EventsManager />
+            </TabsContent>
+
             <TabsContent value="items" className="space-y-6">
               <ItemsManager />
             </TabsContent>

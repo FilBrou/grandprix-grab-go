@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
+import { useEvent } from '@/contexts/EventContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useMondayIntegration } from '@/hooks/useMondayIntegration';
@@ -32,6 +33,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess, ex
   const { language } = useLanguage();
   const { user, profile } = useAuth();
   const { sendOrderConfirmation } = useNotifications();
+  const { currentEvent } = useEvent();
   const { toast } = useToast();
   const { createItem } = useMondayIntegration();
   
@@ -137,6 +139,7 @@ const OrderSystem: React.FC<OrderSystemProps> = ({ cartItems, onOrderSuccess, ex
         .from('orders')
         .insert({
           user_id: user.id,
+          event_id: currentEvent!.id,
           total_amount: totalAmount,
           user_location_id: selectedCollectionPoint,
           status: 'pending'

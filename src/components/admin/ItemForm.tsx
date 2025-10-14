@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useEvent } from '@/contexts/EventContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
   });
 
   const { language } = useLanguage();
+  const { currentEvent } = useEvent();
   const { toast } = useToast();
 
   const translations = {
@@ -136,7 +138,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ item, onClose, isDuplicate = false 
         // Create new item (including duplicates)
         const { error } = await supabase
           .from('items')
-          .insert([itemData]);
+          .insert([{ ...itemData, event_id: currentEvent!.id }]);
 
         if (error) throw error;
 

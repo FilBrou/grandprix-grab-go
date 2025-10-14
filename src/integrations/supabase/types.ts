@@ -14,12 +14,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string
+          hero_image_url: string | null
+          id: string
+          location: string | null
+          logo_url: string | null
+          name: string
+          settings: Json | null
+          slug: string
+          start_date: string
+          status: string
+          theme_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date: string
+          hero_image_url?: string | null
+          id?: string
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          settings?: Json | null
+          slug: string
+          start_date: string
+          status?: string
+          theme_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          hero_image_url?: string | null
+          id?: string
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          settings?: Json | null
+          slug?: string
+          start_date?: string
+          status?: string
+          theme_color?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       items: {
         Row: {
           available: boolean
           category: string
           created_at: string
           description: string | null
+          event_id: string
           id: string
           image_url: string | null
           name: string
@@ -32,6 +84,7 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          event_id: string
           id?: string
           image_url?: string | null
           name: string
@@ -44,6 +97,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          event_id?: string
           id?: string
           image_url?: string | null
           name?: string
@@ -51,7 +105,15 @@ export type Database = {
           stock?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monday_config: {
         Row: {
@@ -59,6 +121,7 @@ export type Database = {
           board_id: string
           board_name: string
           created_at: string
+          event_id: string | null
           id: string
           status_mapping: Json
           updated_at: string
@@ -68,6 +131,7 @@ export type Database = {
           board_id: string
           board_name: string
           created_at?: string
+          event_id?: string | null
           id?: string
           status_mapping?: Json
           updated_at?: string
@@ -77,11 +141,20 @@ export type Database = {
           board_id?: string
           board_name?: string
           created_at?: string
+          event_id?: string | null
           id?: string
           status_mapping?: Json
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "monday_config_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -173,6 +246,7 @@ export type Database = {
         Row: {
           created_at: string
           delivery_location: string | null
+          event_id: string
           id: string
           status: string
           total_amount: number
@@ -183,6 +257,7 @@ export type Database = {
         Insert: {
           created_at?: string
           delivery_location?: string | null
+          event_id: string
           id?: string
           status?: string
           total_amount: number
@@ -193,6 +268,7 @@ export type Database = {
         Update: {
           created_at?: string
           delivery_location?: string | null
+          event_id?: string
           id?: string
           status?: string
           total_amount?: number
@@ -201,6 +277,13 @@ export type Database = {
           user_location_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_user_location_id_fkey"
             columns: ["user_location_id"]
@@ -250,6 +333,7 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          event_id: string
           id: string
           location_name: string
           user_id: string
@@ -257,6 +341,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          event_id: string
           id?: string
           location_name: string
           user_id: string
@@ -264,11 +349,20 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          event_id?: string
           id?: string
           location_name?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_locations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -276,7 +370,7 @@ export type Database = {
     }
     Functions: {
       get_daily_sales: {
-        Args: { days?: number }
+        Args: { days?: number } | { days?: number; event_uuid: string }
         Returns: {
           date: string
           order_count: number
@@ -284,7 +378,9 @@ export type Database = {
         }[]
       }
       get_popular_items: {
-        Args: { limit_count?: number }
+        Args:
+          | { event_uuid: string; limit_count?: number }
+          | { limit_count?: number }
         Returns: {
           item_name: string
           total_quantity: number
@@ -292,7 +388,7 @@ export type Database = {
         }[]
       }
       get_sales_statistics: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { event_uuid: string }
         Returns: {
           average_order_value: number
           total_items_sold: number

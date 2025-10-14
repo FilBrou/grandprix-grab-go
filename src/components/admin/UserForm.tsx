@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useEvent } from '@/contexts/EventContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +44,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
   });
 
   const { language } = useLanguage();
+  const { currentEvent } = useEvent();
   const { toast } = useToast();
 
   const translations = {
@@ -170,6 +172,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
             .insert(
               validLocations.map(loc => ({
                 user_id: user.user_id,
+                event_id: currentEvent!.id,
                 location_name: loc.location_name,
                 address: loc.address || null
               }))
@@ -224,6 +227,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
             .insert(
               validLocations.map(loc => ({
                 user_id: authData.user.id,
+                event_id: currentEvent!.id,
                 location_name: loc.location_name,
                 address: loc.address || null
               }))
