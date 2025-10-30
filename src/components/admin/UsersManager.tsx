@@ -19,10 +19,10 @@ interface User {
   user_id: string;
   email: string;
   name: string | null;
-  role: string;
   phone: string | null;
   created_at: string;
   locations?: UserLocation[];
+  role?: string; // Will be fetched from user_roles
 }
 
 const UsersManager = () => {
@@ -88,22 +88,29 @@ const UsersManager = () => {
 
       if (error) throw error;
 
-      // Fetch locations for each user
-      const usersWithLocations = await Promise.all(
+      // Fetch locations and roles for each user
+      const usersWithExtras = await Promise.all(
         (data || []).map(async (user) => {
           const { data: locations } = await supabase
             .from('user_locations')
             .select('location_name, address')
             .eq('user_id', user.user_id);
 
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.user_id)
+            .single();
+
           return {
             ...user,
-            locations: locations || []
+            locations: locations || [],
+            role: roleData?.role || 'user'
           };
         })
       );
 
-      setUsers(usersWithLocations);
+      setUsers(usersWithExtras);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({

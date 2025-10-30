@@ -7,7 +7,6 @@ interface Profile {
   user_id: string;
   email: string;
   name: string | null;
-  role: 'user' | 'admin';
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -52,10 +52,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      setProfile({
-        ...data,
-        role: data.role as 'user' | 'admin'
-      } as Profile);
+      setProfile(data as Profile);
+
+      // Fetch user role from user_roles table
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+
+      // User is admin if they have an 'admin' role record
+      setIsAdmin(!!roleData);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -126,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const isAdmin = profile?.role === 'admin';
+  // isAdmin is now managed in fetchProfile
 
   const value: AuthContextType = {
     user,

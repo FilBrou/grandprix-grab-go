@@ -293,6 +293,114 @@ export type Database = {
           },
         ]
       }
+      product_return_items: {
+        Row: {
+          created_at: string
+          declared_quantity: number
+          id: string
+          item_id: string
+          reason: string | null
+          return_id: string
+          unit_price: number
+          validated_quantity: number | null
+        }
+        Insert: {
+          created_at?: string
+          declared_quantity: number
+          id?: string
+          item_id: string
+          reason?: string | null
+          return_id: string
+          unit_price: number
+          validated_quantity?: number | null
+        }
+        Update: {
+          created_at?: string
+          declared_quantity?: number
+          id?: string
+          item_id?: string
+          reason?: string | null
+          return_id?: string
+          unit_price?: number
+          validated_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_return_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_return_items_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "product_returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_returns: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          event_id: string
+          id: string
+          notes: string | null
+          return_date: string
+          status: string
+          updated_at: string
+          user_id: string
+          user_location_id: string | null
+          validated_by: string | null
+          validation_date: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          notes?: string | null
+          return_date?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          user_location_id?: string | null
+          validated_by?: string | null
+          validation_date?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          notes?: string | null
+          return_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          user_location_id?: string | null
+          validated_by?: string | null
+          validation_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_returns_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_returns_user_location_id_fkey"
+            columns: ["user_location_id"]
+            isOneToOne: false
+            referencedRelation: "user_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -301,7 +409,6 @@ export type Database = {
           location: string | null
           name: string | null
           phone: string | null
-          role: string
           updated_at: string
           user_id: string
         }
@@ -312,7 +419,6 @@ export type Database = {
           location?: string | null
           name?: string | null
           phone?: string | null
-          role?: string
           updated_at?: string
           user_id: string
         }
@@ -323,7 +429,6 @@ export type Database = {
           location?: string | null
           name?: string | null
           phone?: string | null
-          role?: string
           updated_at?: string
           user_id?: string
         }
@@ -364,49 +469,104 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_daily_sales: {
-        Args: { days?: number } | { days?: number; event_uuid: string }
-        Returns: {
-          date: string
-          order_count: number
-          total_sales: number
-        }[]
+      calculate_user_returns_total: {
+        Args: { p_event_id: string; p_user_id: string }
+        Returns: number
       }
-      get_popular_items: {
-        Args:
-          | { event_uuid: string; limit_count?: number }
-          | { limit_count?: number }
-        Returns: {
-          item_name: string
-          total_quantity: number
-          total_revenue: number
-        }[]
-      }
-      get_sales_statistics: {
-        Args: Record<PropertyKey, never> | { event_uuid: string }
-        Returns: {
-          average_order_value: number
-          total_items_sold: number
-          total_orders: number
-          total_revenue: number
-        }[]
-      }
-      is_admin: {
-        Args: { user_uuid: string }
+      get_daily_sales:
+        | {
+            Args: { days?: number }
+            Returns: {
+              date: string
+              order_count: number
+              total_sales: number
+            }[]
+          }
+        | {
+            Args: { days?: number; event_uuid: string }
+            Returns: {
+              date: string
+              order_count: number
+              total_sales: number
+            }[]
+          }
+      get_popular_items:
+        | {
+            Args: { limit_count?: number }
+            Returns: {
+              item_name: string
+              total_quantity: number
+              total_revenue: number
+            }[]
+          }
+        | {
+            Args: { event_uuid: string; limit_count?: number }
+            Returns: {
+              item_name: string
+              total_quantity: number
+              total_revenue: number
+            }[]
+          }
+      get_sales_statistics:
+        | {
+            Args: never
+            Returns: {
+              average_order_value: number
+              total_items_sold: number
+              total_orders: number
+              total_revenue: number
+            }[]
+          }
+        | {
+            Args: { event_uuid: string }
+            Returns: {
+              average_order_value: number
+              total_items_sold: number
+              total_orders: number
+              total_revenue: number
+            }[]
+          }
+      has_role: {
+        Args: {
+          check_role: Database["public"]["Enums"]["app_role"]
+          check_user_id: string
+        }
         Returns: boolean
       }
+      is_admin: { Args: { user_uuid: string }; Returns: boolean }
       update_item_stock: {
         Args: { item_id: string; quantity_to_subtract: number }
         Returns: undefined
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -533,6 +693,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

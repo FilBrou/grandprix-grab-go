@@ -20,7 +20,7 @@ interface User {
   user_id: string;
   email: string;
   name: string | null;
-  role: string;
+  role?: string;
   phone: string | null;
   locations?: UserLocation[];
 }

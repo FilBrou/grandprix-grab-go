@@ -24,7 +24,7 @@ import { EventsManager } from './EventsManager';
 import MondayIntegration from '../MondayIntegration';
 import MondayOrdersConfig from './MondayOrdersConfig';
 import SyncTodayOrders from './SyncTodayOrders';
-import UploadDrinkImages from './UploadDrinkImages';
+import { ReturnsManager } from './ReturnsManager';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('events');
@@ -39,6 +39,7 @@ const AdminDashboard = () => {
       events: 'Événements',
       items: 'Articles',
       orders: 'Commandes',
+      returns: 'Retours',
       users: 'Utilisateurs',
       reports: 'Rapports',
       settings: 'Paramètres',
@@ -56,6 +57,7 @@ const AdminDashboard = () => {
       events: 'Events',
       items: 'Items',
       orders: 'Orders',
+      returns: 'Returns',
       users: 'Users',
       reports: 'Reports',
       settings: 'Settings',
@@ -130,7 +132,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7 lg:w-fit lg:grid-cols-7">
             <TabsTrigger value="events" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">{t.events}</span>
@@ -142,6 +144,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
               <span className="hidden sm:inline">{t.orders}</span>
+            </TabsTrigger>
+            <TabsTrigger value="returns" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.returns}</span>
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -170,6 +176,10 @@ const AdminDashboard = () => {
               <OrdersManager />
             </TabsContent>
 
+            <TabsContent value="returns" className="space-y-6">
+              <ReturnsManager />
+            </TabsContent>
+
             <TabsContent value="users" className="space-y-6">
               <UsersManager />
             </TabsContent>
@@ -191,7 +201,6 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <UploadDrinkImages />
                     <MondayOrdersConfig />
                     <SyncTodayOrders />
                     <div>
