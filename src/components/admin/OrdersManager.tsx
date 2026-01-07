@@ -65,7 +65,11 @@ const OrdersManager = () => {
       statusUpdated: 'Statut mis à jour avec succès',
       error: 'Erreur',
       noOrders: 'Aucune commande trouvée',
-      unknown: 'Inconnu'
+      unknown: 'Inconnu',
+      sendToMonday: 'Envoyer à Monday',
+      syncing: 'Synchronisation...',
+      syncSuccess: 'Commande synchronisée avec Monday',
+      syncError: 'Erreur de synchronisation avec Monday'
     },
     en: {
       title: 'Orders Management',
