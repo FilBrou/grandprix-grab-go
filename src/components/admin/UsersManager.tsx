@@ -127,20 +127,26 @@ const UsersManager = () => {
     if (!confirm(t.confirmDelete)) return;
 
     try {
-      // Delete from auth.users (this will cascade to profiles)
-      const { error } = await supabase.auth.admin.deleteUser(userAuthId);
+      // Delete via Edge Function (requires admin privileges)
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: {
+          action: 'delete',
+          userData: { userId: userAuthId }
+        }
+      });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       setUsers(users.filter(user => user.id !== userId));
       toast({
         title: t.userDeleted,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
       toast({
         title: t.error,
-        description: 'Failed to delete user',
+        description: error.message || 'Failed to delete user',
         variant: 'destructive',
       });
     }
