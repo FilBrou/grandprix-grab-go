@@ -77,11 +77,11 @@ const Header = () => {
                 <CartIcon onClick={() => setIsCartOpen(true)} />
               </div>
             </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-lg">
-              <SheetHeader>
+            <SheetContent className="w-full sm:max-w-lg flex flex-col overflow-hidden">
+              <SheetHeader className="flex-shrink-0">
                 <SheetTitle>{t('cart.title')}</SheetTitle>
               </SheetHeader>
-              <div className="mt-6">
+              <div className="flex-1 overflow-y-auto mt-6">
                 <Cart />
               </div>
             </SheetContent>
