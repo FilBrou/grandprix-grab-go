@@ -17,11 +17,8 @@ const Header = () => {
   const navigate = useNavigate();
 
   const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'zh', name: '中文', flag: '🇨🇳' },
-    { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
   ] as const;
 
   const currentLanguage = languages.find(lang => lang.code === language);
