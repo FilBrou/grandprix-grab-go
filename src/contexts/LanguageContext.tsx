@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+// Supported languages: French (default) and English
 type Language = 'en' | 'fr';
 
 interface LanguageContextType {
