@@ -144,6 +144,7 @@ const ExpressCheckout: React.FC = () => {
 
       clearCart();
       navigate('/orders', { replace: true });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch (error) {
       console.error('Express checkout error:', error);
       toast({
