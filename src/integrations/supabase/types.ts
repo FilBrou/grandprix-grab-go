@@ -518,7 +518,7 @@ export type Database = {
           }
       get_popular_items:
         | {
-            Args: { limit_count?: number }
+            Args: { event_uuid: string; limit_count?: number }
             Returns: {
               item_name: string
               total_quantity: number
@@ -526,7 +526,7 @@ export type Database = {
             }[]
           }
         | {
-            Args: { event_uuid: string; limit_count?: number }
+            Args: { limit_count?: number }
             Returns: {
               item_name: string
               total_quantity: number

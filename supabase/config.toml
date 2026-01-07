@@ -79,3 +79,6 @@ verify_jwt = false
 
 [functions.sync-order-by-id]
 verify_jwt = false
+
+[functions.manage-users]
+verify_jwt = false

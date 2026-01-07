@@ -146,12 +146,11 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
 
     try {
       if (user) {
-        // Update existing user
+        // Update existing user profile
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
             name: formData.name || null,
-            role: formData.role,
             phone: formData.phone || null
           })
           .eq('user_id', user.user_id);
@@ -181,43 +180,45 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
           if (locationsError) throw locationsError;
         }
 
-        // Update password if provided
-        if (formData.password) {
-          const { error: passwordError } = await supabase.auth.admin.updateUserById(
-            user.user_id,
-            { password: formData.password }
-          );
-          if (passwordError) throw passwordError;
+        // Update password and role via Edge Function
+        if (formData.password || formData.role !== user.role) {
+          const { data, error: updateError } = await supabase.functions.invoke('manage-users', {
+            body: {
+              action: 'update',
+              userData: {
+                userId: user.user_id,
+                password: formData.password || undefined,
+                role: formData.role
+              }
+            }
+          });
+
+          if (updateError) throw updateError;
+          if (data?.error) throw new Error(data.error);
         }
 
         toast({
           title: t.userUpdated,
         });
       } else {
-        // Create new user
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: formData.email,
-          password: formData.password,
-          email_confirm: true,
-          user_metadata: {
-            name: formData.name
+        // Create new user via Edge Function
+        const { data, error: createError } = await supabase.functions.invoke('manage-users', {
+          body: {
+            action: 'create',
+            userData: {
+              email: formData.email,
+              password: formData.password,
+              name: formData.name,
+              phone: formData.phone,
+              role: formData.role
+            }
           }
         });
 
-        if (authError) throw authError;
+        if (createError) throw createError;
+        if (data?.error) throw new Error(data.error);
 
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{
-            user_id: authData.user.id,
-            email: formData.email,
-            name: formData.name || null,
-            role: formData.role,
-            phone: formData.phone || null
-          }]);
-
-        if (profileError) throw profileError;
+        const newUserId = data.user.id;
 
         // Insert locations
         const validLocations = locations.filter(loc => loc.location_name.trim() !== '');
@@ -226,7 +227,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onClose }) => {
             .from('user_locations')
             .insert(
               validLocations.map(loc => ({
-                user_id: authData.user.id,
+                user_id: newUserId,
                 event_id: currentEvent!.id,
                 location_name: loc.location_name,
                 address: loc.address || null
