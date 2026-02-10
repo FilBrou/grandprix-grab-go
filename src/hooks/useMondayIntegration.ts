@@ -103,6 +103,19 @@ export const useMondayIntegration = () => {
     return result.change_multiple_column_values;
   };
 
+  const createSubitem = async (
+    parentItemId: string,
+    itemName: string,
+    columnValues?: Record<string, any>
+  ) => {
+    const result = await callMondayFunction('createSubitem', {
+      parentItemId,
+      itemName,
+      columnValues
+    });
+    return result.create_subitem;
+  };
+
   return {
     loading,
     error,
@@ -110,6 +123,7 @@ export const useMondayIntegration = () => {
     getBoardItems,
     getBoardColumns,
     createItem,
-    updateItem
+    updateItem,
+    createSubitem
   };
 };

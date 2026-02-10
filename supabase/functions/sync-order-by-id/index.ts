@@ -107,6 +107,66 @@ async function createMondayItem(boardId: string, orderNumber: string, columnValu
   });
 }
 
+async function createSubitem(parentItemId: string, itemName: string, columnValues?: any) {
+  const query = `
+    mutation ($parentItemId: ID!, $itemName: String!, $columnValues: JSON) {
+      create_subitem (
+        parent_item_id: $parentItemId,
+        item_name: $itemName,
+        column_values: $columnValues
+      ) {
+        id
+        name
+        board { id }
+      }
+    }
+  `;
+  
+  return await makeMondayRequest(query, {
+    parentItemId: parseInt(parentItemId),
+    itemName,
+    columnValues: columnValues ? JSON.stringify(columnValues) : undefined
+  });
+}
+
+async function getSubitemColumns(parentItemId: string) {
+  // Create a temporary subitem to discover the sub-board, then get its columns
+  const tempResult = await createSubitem(parentItemId, "__temp_column_discovery__");
+  const subBoardId = tempResult.data?.create_subitem?.board?.id;
+  const tempSubitemId = tempResult.data?.create_subitem?.id;
+  
+  if (!subBoardId) {
+    console.warn('Could not discover sub-board ID');
+    return { columns: [], subBoardId: null };
+  }
+
+  // Get columns of the sub-board
+  const columnsResult = await getBoardColumns(subBoardId);
+  const columns = columnsResult.data?.boards?.[0]?.columns || [];
+
+  // Delete the temporary subitem
+  if (tempSubitemId) {
+    try {
+      await makeMondayRequest(`mutation { delete_item (item_id: ${tempSubitemId}) { id } }`);
+    } catch (e) {
+      console.warn('Could not delete temp subitem:', e);
+    }
+  }
+
+  return { columns, subBoardId };
+}
+
+function mapSubitemColumns(columns: any[]): Map<string, { id: string; type: string }> {
+  const columnMap = new Map();
+  columns.forEach((col: any) => {
+    const title = col.title.toLowerCase();
+    if (title.includes('quantit') || title.includes('qty')) columnMap.set('quantity', { id: col.id, type: col.type });
+    if (title.includes('prix') || title.includes('price')) columnMap.set('price', { id: col.id, type: col.type });
+    if (title.includes('sous-total') || title.includes('subtotal') || title.includes('total')) columnMap.set('subtotal', { id: col.id, type: col.type });
+  });
+  return columnMap;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -263,11 +323,54 @@ serve(async (req) => {
 
     console.log(`Successfully synced order Commande #${order.id.slice(-8)} (Monday ID: ${mondayItemId})`);
 
+    // Create subitems for each order item
+    const subitemResults: any[] = [];
+    if (mondayItemId && order.order_items.length > 0) {
+      try {
+        // Discover sub-board columns from the first subitem
+        const { columns: subColumns } = await getSubitemColumns(mondayItemId);
+        const subColumnMap = mapSubitemColumns(subColumns);
+        console.log('Sub-board columns detected:', Array.from(subColumnMap.entries()));
+
+        for (const orderItem of order.order_items) {
+          try {
+            const subColumnValues: any = {};
+
+            if (subColumnMap.has('quantity')) {
+              const qtyCol = subColumnMap.get('quantity')!;
+              subColumnValues[qtyCol.id] = orderItem.quantity;
+            }
+            if (subColumnMap.has('price')) {
+              const priceCol = subColumnMap.get('price')!;
+              subColumnValues[priceCol.id] = orderItem.unit_price;
+            }
+            if (subColumnMap.has('subtotal')) {
+              const subtotalCol = subColumnMap.get('subtotal')!;
+              subColumnValues[subtotalCol.id] = orderItem.quantity * orderItem.unit_price;
+            }
+
+            const subResult = await createSubitem(
+              mondayItemId,
+              orderItem.items.name,
+              Object.keys(subColumnValues).length > 0 ? subColumnValues : undefined
+            );
+            subitemResults.push({ name: orderItem.items.name, id: subResult.data?.create_subitem?.id });
+            console.log(`Created subitem for ${orderItem.items.name}`);
+          } catch (subError) {
+            console.error(`Failed to create subitem for ${orderItem.items.name}:`, subError);
+          }
+        }
+      } catch (subError) {
+        console.error('Failed to create subitems (parent item still synced):', subError);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         message: `Order ${order.id.slice(-8)} synced successfully`,
-        mondayItemId
+        mondayItemId,
+        subitems: subitemResults
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
