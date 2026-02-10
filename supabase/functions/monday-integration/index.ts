@@ -227,7 +227,30 @@ async function updateItem(itemId: string, columnValues: any) {
   });
 }
 
-// Get board columns information
+// Create a subitem under a parent item
+async function createSubitem(parentItemId: string, itemName: string, columnValues?: any) {
+  const query = `
+    mutation ($parentItemId: ID!, $itemName: String!, $columnValues: JSON) {
+      create_subitem (
+        parent_item_id: $parentItemId,
+        item_name: $itemName,
+        column_values: $columnValues
+      ) {
+        id
+        name
+        board { id }
+      }
+    }
+  `;
+  
+  return await makeMondayRequest(query, {
+    parentItemId: parseInt(parentItemId),
+    itemName,
+    columnValues: columnValues ? JSON.stringify(columnValues) : undefined
+  });
+}
+
+
 async function getBoardColumns(boardId: string) {
   const query = `
     query ($boardId: [ID!]) {
@@ -294,6 +317,13 @@ serve(async (req) => {
           throw new Error('itemId and columnValues are required for updateItem');
         }
         result = await updateItem(params.itemId, params.columnValues);
+        break;
+
+      case 'createSubitem':
+        if (!params.parentItemId || !params.itemName) {
+          throw new Error('parentItemId and itemName are required for createSubitem');
+        }
+        result = await createSubitem(params.parentItemId, params.itemName, params.columnValues);
         break;
 
       default:
