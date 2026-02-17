@@ -238,7 +238,7 @@ serve(async (req) => {
     const columnsResult = await getBoardColumns(boardId);
     const columns = columnsResult.data?.boards?.[0]?.columns || [];
 
-    // Create column mapping
+    // Create column mapping based on column titles
     const columnMap = new Map();
     columns.forEach((col: any) => {
       const title = col.title.toLowerCase();
@@ -247,8 +247,9 @@ serve(async (req) => {
       if (title.includes('montant') || title.includes('total') || title.includes('prix')) columnMap.set('amount', { id: col.id, type: col.type });
       if (title.includes('point') || title.includes('collecte') || title.includes('livraison')) columnMap.set('collection', { id: col.id, type: col.type });
       if (title.includes('article') || title.includes('produit') || title.includes('item')) columnMap.set('items', { id: col.id, type: col.type });
-      if (title.includes('date') && title.includes('commande')) columnMap.set('date', { id: col.id, type: col.type });
+      if (title === 'date' || (title.includes('date') && title.includes('commande'))) columnMap.set('date', { id: col.id, type: col.type });
       if (title.includes('id') && title.includes('commande')) columnMap.set('order_id', { id: col.id, type: col.type });
+      if (title.includes('type') && title.includes('site')) columnMap.set('site_type', { id: col.id, type: col.type });
     });
 
     console.log('Detected columns:', Array.from(columnMap.entries()));
@@ -256,12 +257,12 @@ serve(async (req) => {
     // Prepare column values
     const columnValues: any = {};
     const clientInfo = profile?.email || 'N/A';
-    const statusMapping = {
-      pending: 'En attente',
-      confirmed: 'Confirmée',
-      ready: 'Prête',
-      completed: 'Terminée',
-      cancelled: 'Annulée'
+    const statusMapping: Record<string, string> = {
+      pending: 'Nouvelle Commande',
+      confirmed: 'En cours',
+      ready: 'En cours',
+      completed: 'Livré',
+      cancelled: 'Annulé'
     };
 
     // Map order data to Monday columns
@@ -273,7 +274,7 @@ serve(async (req) => {
           text: profile?.name || clientInfo
         };
       } else if (clientCol.type === 'text') {
-        columnValues[clientCol.id] = profile?.name || clientInfo;
+        columnValues[clientCol.id] = profile?.name ? `${profile.name} (${profile.email || ''})` : clientInfo;
       } else {
         columnValues[clientCol.id] = `${profile?.name || 'Client'} (${profile?.email || 'N/A'})`;
       }
@@ -281,7 +282,7 @@ serve(async (req) => {
 
     if (columnMap.has('status')) {
       const statusCol = columnMap.get('status');
-      columnValues[statusCol.id] = statusMapping[order.status as keyof typeof statusMapping] || order.status;
+      columnValues[statusCol.id] = statusMapping[order.status] || order.status;
     }
 
     if (columnMap.has('amount')) {
@@ -307,12 +308,18 @@ serve(async (req) => {
 
     if (columnMap.has('date')) {
       const dateCol = columnMap.get('date');
-      columnValues[dateCol.id] = order.created_at.split('T')[0]; // Format as YYYY-MM-DD
+      columnValues[dateCol.id] = order.created_at.split('T')[0];
     }
 
     if (columnMap.has('order_id')) {
       const orderIdCol = columnMap.get('order_id');
       columnValues[orderIdCol.id] = order.id;
+    }
+
+    // Set "Type de site Web" to "Loveable" if column exists
+    if (columnMap.has('site_type')) {
+      const siteTypeCol = columnMap.get('site_type');
+      columnValues[siteTypeCol.id] = 'Loveable';
     }
 
     console.log(`Column values for order: Commande #${order.id.slice(-8)}`, columnValues);
